@@ -2,37 +2,127 @@
   text-align: center;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+.board {
+  width: 1000px;
+  height: 800 px;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+.board-pins {
+  display: flex;
+  justify-content: space-between; /* Adjust the spacing between pins */
+  align-items: center; /* Center the pins vertically */
+  padding: 10px; /* Adjust padding as needed */
 }
 
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
+.pin {
   display: flex;
   flex-direction: column;
   align-items: center;
+  /* justify-content: center; */
+  width: 100px; /* Adjust the width as needed */
+  height: 480px; /* Adjust the height as needed */
+  user-select: none;
+}
+
+.claim-button {
+  background-color: #4caf50; /* Green background color */
+  border: none; /* Remove border */
+  color: white; /* White text color */
+  padding: 10px 20px; /* Add padding */
+  text-align: center; /* Center text */
+  text-decoration: none; /* Remove underline */
+  display: inline-block; /* Make it an inline element */
+  font-size: 16px; /* Set font size */
+  border-radius: 20%; /* Add rounded corners */
+  cursor: pointer; /* Add cursor pointer on hover */
+}
+
+/* Style on hover */
+.claim-button:hover {
+  background-color: #45a049;
+}
+
+.circle {
+  display: flex;
+  align-items: center;
   justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+  top: 50%;
+  left: 50%;
+  width: 30px; /* Adjust the circle size as needed */
+  height: 30px; /* Adjust the circle size as needed */
+  border-radius: 50%;
+  background-color: red;
+  margin: 10px;
 }
 
-.App-link {
-  color: #61dafb;
+.player1-card,
+.player2-card {
+  display: flex;
+  justify-content: space-between;
+  margin: 5px;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
+.card {
+  width: 40px; /* Adjust the card size as needed */
+  height: 50px; /* Adjust the card size as needed */
+  background-color: white;
+  color: black;
+  font-size: 24px;
+  font-weight: 600;
+  border-radius: 10%;
+  border: 2px solid black;
+  margin: 3px;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+  /* Adjust the card style as needed */
+  /* Add more styling for the card as needed */
+}
+
+.cards-played {
+  display: flex;
+  flex-direction: column;
+}
+
+.claimed-player1 .circle {
+  animation: moveDown 0.5s ease-in-out forwards;
+}
+
+@keyframes moveDown {
+  0% {
+    transform: translateY(0);
   }
-  to {
-    transform: rotate(360deg);
+  100% {
+    transform: translateY(240px);
   }
+}
+
+.claimed-player2 .circle {
+  animation: moveUp 0.5s ease-in-out forwards;
+}
+
+@keyframes moveUp {
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(-240px);
+  }
+}
+
+.claimed-player1 .cards-played,
+.claimed-player2 .cards-played {
+  /* Add your styling for cards-played when claimed */
+  opacity: 0.5; /* For example, reduce opacity when claimed */
+  /* Add more styling for the claimed state as needed */
+}
+
+.player1-hand {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  height: 80px;
 }
