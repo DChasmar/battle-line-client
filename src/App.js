@@ -1,15 +1,28 @@
 import './App.css';
 import React, { useState, createContext, useEffect } from "react";
 import Board from './components/Board'
-import { initializeGameData, handlePlayer2ClaimPins, handlePlayer2PlayCard, handlePlayer2DrawCard, checkGameOver, resetGame } from './utils';
-import PlayerHand from './components/PlayerHand';
-import Decks from './components/Decks';
+import { initializeGameData, handlePlayer2ClaimPins, handlePlayer2PlayCard, handlePlayer2DrawCard, checkGameOver } from './utils';
+import Prompt from './components/Prompt';
+import GameOver from './components/GameOver';
+import Instructions from './components/Instructions';
 
 export const AppContext = createContext();
 
 function App() {
   const [gameData, setGameData] = useState({});
-  const [cardToPlay, setCardToPlay] = useState("");
+  const [cardToPlay, setCardToPlay] = useState({
+    "troop": "",
+    "tacticColor": "",
+    "tacticSwap": "",
+    "tacticSteal": "",
+    "tacticChangePin": "",
+    "tacticSwitch": "",
+    "tacticNewTroops": ""
+  });
+  const [claimedCount, setClaimedCount] = useState(0);
+
+  const [showPrompt, setShowPrompt] = useState(true);
+  const [showInstructions, setShowInstructions] = useState(false);
 
   useEffect(() => {
     const newGameData = initializeGameData()
@@ -28,24 +41,43 @@ function App() {
         }
     }
   // eslint-disable-next-line
-  }, [gameData && gameData["nextAction"]]);
+  }, [gameData]);
 
   useEffect(() => {
+    let claimed = 0;
+    for (const pin in gameData["claimed"]) {
+      if (pin === "player1"  || pin === "player2") claimed++;
+    }
+    // console.log(`Claimed = ${claimed}`)
+    if (claimed === claimedCount) return;
+
     if (gameData && gameData["claimed"]) {
       const winner = checkGameOver(gameData);
-      console.log("The winner is...", winner);
       if (winner) {
-        console.log("That's game over.");
-        alert(`${winner} wins!`);
-        resetGame(winner, setGameData);
+        const newData = { ...gameData };
+        newData["gameOver"] = winner;
+        setGameData(newData);
+        console.log(`That's game over. ${winner} wins!`);
       }
     }
-    // eslint-disable-next-line
-  }, [gameData && gameData["claimed"], gameData]);
+    setClaimedCount(claimed);
+  // eslint-disable-next-line
+  }, [gameData]);
 
-  // useEffect(() => {
-  //   console.log(gameData)
-  // }, [gameData]);
+  const hidePrompt = () => {
+    if (!showPrompt) return;
+    setShowPrompt(false);
+  };
+
+  const toggleInstructions = () => {
+    if (showInstructions) setShowInstructions(false);
+    else setShowInstructions(true);
+  };
+
+
+  useEffect(() => {
+    console.log(gameData)
+  }, [gameData]);
 
   return (
     <div className="App">
@@ -54,16 +86,17 @@ function App() {
           gameData,
           setGameData,
           cardToPlay, 
-          setCardToPlay
+          setCardToPlay,
+          hidePrompt,
+          toggleInstructions
         }}>
+      {showPrompt && <Prompt />}
       <h2> Battle Line </h2>
       <div>
         <Board />
-        <div style = {{display: 'flex', flexDirection: 'row', justifyContent: 'center'}}>
-          <PlayerHand />
-          <Decks />
-        </div>
       </div>
+      {showInstructions && <Instructions />}
+      {gameData.gameOver && <GameOver />}
       </AppContext.Provider>
     </div>
   );

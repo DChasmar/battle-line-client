@@ -2,35 +2,47 @@
 import React, { useState, useContext, useEffect } from 'react';
 import { AppContext } from "../App";
 // eslint-disable-next-line
-import { selectTroopCard, updateNextAction } from '../utils';
+import { selectTroopCard, selectTacticCard, updateNextAction } from '../utils';
 
-function DeckCard() {
+function DeckCard( {troop, tactic} ) {
     const { gameData, setGameData } = useContext(AppContext);
 
     // Dynamically assign styles
     const styles = {
-      backgroundColor: '#888',
+      backgroundColor: troop ? '#999' : tactic ? '#ddd' : 'white',
       fontSize: '9px',
       justifyContent: 'center',
-      cursor: 'pointer'
+      cursor: gameData["nextAction"] === 'player1Draw' ? 'pointer' : 'default'
     }
 
+    const text = troop ? "Troop" : tactic ? "Tactic" : null
+
     const handleClick = () => {
-        if (gameData["nextAction"] !== 'player1Draw') return;
-    
+      if (gameData["nextAction"] !== 'player1Draw') return;
+      if (troop && gameData["troopCards"].size < 1) {
+        alert("There are no Troop cards left.");
+        // Manage condition when there are no troops or no tactics left
+      } else if (tactic && gameData["tacticCards"].size < 1) {
+        alert("There are no Tactic cards left.");
+        // Manage condition when there are no troops or no tactics left
+      }
+      if (troop) {
         const newData = updateNextAction(selectTroopCard('player1', gameData));
         setGameData(newData);
+      } else if (tactic) {
+        const newData = updateNextAction(selectTacticCard('player1', gameData));
+        setGameData(newData);
+      }
     };
 
     return (
-        <div
-          className='card'
-          style={styles}
-          onClick={handleClick}
-        >
-            Troop
-            Cards
-        </div>
+      <div
+        className='card'
+        style={styles}
+        onClick={handleClick}
+      >
+        {text}
+      </div>
     );
 }
 

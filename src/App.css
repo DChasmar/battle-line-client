@@ -3,15 +3,17 @@
 }
 
 .board {
-  width: 1000px;
-  height: 800 px;
+  width: 750px;
+  height: 600px;
+  background-color: blanchedalmond;
+  border: 2px solid black;
+  border-radius: 20px;
+  margin: 10px;
 }
 
 .board-pins {
   display: flex;
-  justify-content: space-between; /* Adjust the spacing between pins */
   align-items: center; /* Center the pins vertically */
-  padding: 10px; /* Adjust padding as needed */
 }
 
 .pin {
@@ -19,21 +21,22 @@
   flex-direction: column;
   align-items: center;
   /* justify-content: center; */
-  width: 100px; /* Adjust the width as needed */
-  height: 480px; /* Adjust the height as needed */
+  width: 80px; /* Adjust the width as needed */
+  height: 430px; /* Adjust the height as needed */
   user-select: none;
+  /* Make sure there is enough room for the claim flag or change pin tactic to show */
 }
 
 .claim-button {
   background-color: #4caf50; /* Green background color */
   border: none; /* Remove border */
   color: white; /* White text color */
-  padding: 10px 20px; /* Add padding */
+  padding: 6px 12px; /* Add padding */
   text-align: center; /* Center text */
   text-decoration: none; /* Remove underline */
   display: inline-block; /* Make it an inline element */
   font-size: 16px; /* Set font size */
-  border-radius: 20%; /* Add rounded corners */
+  border-radius: 5px; /* Add rounded corners */
   cursor: pointer; /* Add cursor pointer on hover */
 }
 
@@ -48,8 +51,8 @@
   justify-content: center;
   top: 50%;
   left: 50%;
-  width: 30px; /* Adjust the circle size as needed */
-  height: 30px; /* Adjust the circle size as needed */
+  width: 20px; /* Adjust the circle size as needed */
+  height: 20px; /* Adjust the circle size as needed */
   border-radius: 50%;
   background-color: red;
   margin: 10px;
@@ -96,7 +99,7 @@
     transform: translateY(0);
   }
   100% {
-    transform: translateY(240px);
+    transform: translateY(212px);
   }
 }
 
@@ -109,7 +112,7 @@
     transform: translateY(0);
   }
   100% {
-    transform: translateY(-240px);
+    transform: translateY(-212px);
   }
 }
 
@@ -120,9 +123,101 @@
   /* Add more styling for the claimed state as needed */
 }
 
-.player1-hand {
+.player1-hand,
+.player2-hand {
   display: flex;
   flex-direction: row;
   justify-content: center;
-  height: 80px;
+  height: 60px;
+  margin-top: 10px;
+  margin-bottom: 24px;
+}
+
+/* Prompt Styles */
+
+.prompt {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: #f0be82; 
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 999; /* Ensure it's on top of other content */
+  text-align: center;
+  user-select: none;
+  opacity: 1;
+  transition: opacity 0.5s ease;
+}
+
+.prompt.hidden {
+  opacity: 0;
+}
+
+.play-button {
+  position: relative;
+  border: none;
+  height: 3em;
+  border-radius: 1.5em;
+  align-content: center;
+  letter-spacing: .05em;
+  margin: 0 10px 8px;
+  background: #000;
+  color: #fff;
+  font-size: 16px;
+  font-family: Arial, Helvetica, sans-serif;
+  font-weight: 500;
+  line-height: 28px;
+  margin-bottom: 8px;
+  cursor: pointer;
+  padding: 0 2em;
+}
+
+.icon-container {
+  display: flex;
+  flex-direction: row;
+}
+
+.icon-circle {
+  width: 25px;
+  height: 25px;
+  background-color: red;
+  border-radius: 50%; /* Makes the element circular */
+  cursor: default;
+  margin: 5px;
+}
+
+/* Game Over Modal Styles */
+
+.game-over-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+.game-over-content {
+  text-align: center;
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+}
+
+.game-over-content button {
+  margin-top: 10px;
+  padding: 12px 20px;
+  cursor: pointer;
+  background-color: #3498db;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
 }

@@ -7,9 +7,16 @@ import DeckCard from './DeckCard';
 function Decks() {
     // eslint-disable-next-line
     const { gameData, setGameData } = useContext(AppContext);
+    
+    if (!gameData || !Object.keys(gameData).length) {
+        console.log("Not working.")
+        return null; // or return a loading indicator or an empty div
+    }
+
     return (
-        <div style = {{display: 'flex', flexDirection: 'row'}}>
-            <DeckCard />
+        <div style = {{display: 'flex', flexDirection: 'row', margin: '10px'}}>
+            {gameData["troopCards"].size > 0 && <DeckCard troop />}
+            {gameData["tacticCards"].size > 0 && <DeckCard tactic />}
         </div>
     )
 }

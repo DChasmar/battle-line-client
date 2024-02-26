@@ -1,23 +1,51 @@
-import { COLORS, CARDS_PER_COLOR, PINS, WEDGE_VALUE, TRIPS_VALUE, FLUSH_VALUE, STRAIGHT_VALUE } from './constants'
+import { COLORS, COLORS_SET, CARDS_PER_COLOR, PINS, WEDGE_VALUE, TRIPS_VALUE, FLUSH_VALUE, STRAIGHT_VALUE } from './constants'
+
+const buildTacticDeck = () => {
+    const tacticCards = new Set();
+
+    for (let number = 1; number <= 10; number++) {
+        const card = "t" + number;
+        tacticCards.add(card);
+    };
+    return tacticCards;
+}
 
 const buildTroopDeck = () => {
-    let troopCards = new Set();
+    const troopCards = new Set();
 
     for (const color of COLORS) {
-        for (var i = 0; i < CARDS_PER_COLOR; i++) {
-            var card = color + (i + 1);
+        for (let number = 1; number <= CARDS_PER_COLOR; number++) {
+            const card = color + number;
             troopCards.add(card);
         }
     }
-    return troopCards
+    return troopCards;
 }
+
+// eslint-disable-next-line
+const disguiseOpponentHand = (hand) => {
+    // The hand is a set
+    let tacticNumber = 0;
+    const concealedHand = [];
+
+    for (const card of hand) {
+        if (card[0] === 't') tacticNumber++;
+        else concealedHand.push("T0");
+    }
+
+    for (let i = 0; i < tacticNumber; i++) {
+        concealedHand.push("t0");
+    }
+
+    return concealedHand;
+};
 
 export const initializeGameData = () => {
     let data = {};
     let troopCards = buildTroopDeck()
 
-    for (let i = 0; i < PINS; i++) {
-        const pin = "pin" + (i + 1);
+    for (let i = 1; i <= PINS; i++) {
+        const pin = "pin" + i;
         const player1 = {}, player2 = {};
 
     for (const player of [player1, player2]) {
@@ -26,15 +54,17 @@ export const initializeGameData = () => {
             player["claimable"] = false;
         }
 
-        data[pin] = {"player1": player1, "player2": player2, "claimed": false, "firstToCompleteHand": false};
+        data[pin] = {"player1": player1, "player2": player2, "claimed": false, "firstToCompleteHand": false, "tacticPlayed": false};
     }
 
     const dealCardData = dealCards(troopCards);
 
     data["player1Hand"] = dealCardData.player1Hand;
     data["player2Hand"] = dealCardData.player2Hand;
+    data["player2HandConcealed"] = disguiseOpponentHand(dealCardData.player2Hand);
     data["used"] = new Set();
     data["troopCards"] = dealCardData.newTroopCards;
+    data["tacticCards"] = buildTacticDeck();
     data["claimed"] = {
         "pin1": false,
         "pin2": false,
@@ -47,6 +77,24 @@ export const initializeGameData = () => {
         "pin9": false
     }
     data["nextAction"] = "player1Play"
+
+    const pinSet = new Set();
+
+    for (let i = 1; i <= 9; i++) {
+        pinSet.add("pin" + i);
+    }
+
+    data["player1PinsPlayable"] = {
+        "troop": pinSet,
+        "tactic": pinSet
+    }
+
+    data["player2PinsPlayable"] = {
+        "troop": pinSet,
+        "tactic": pinSet
+    }
+    data["tacticsPlayed"] = { "player1": 0, "player2": 0};
+    data["gameOver"] = false;
 
     return data;
 }
@@ -145,7 +193,7 @@ const calculateScore = (pin, player, data) => {
 }
 
 export const selectTroopCard = (player, data) => {
-    if (data[`${player}Hand`].size > 6) return;
+    if (data[`${player}Hand`].size > 6 || data["troopCards"].size < 1) return data;
 
     const troopCardsList = Array.from(data["troopCards"]);
     const drawnCard = troopCardsList[Math.floor(Math.random() * troopCardsList.length)];
@@ -155,9 +203,23 @@ export const selectTroopCard = (player, data) => {
         [`${player}Hand`]: new Set([...data[`${player}Hand`], drawnCard]),
         "troopCards": new Set([...data["troopCards"]].filter(card => card !== drawnCard)),
     };
-
+    // console.log(`This is the newData in SelectTroopCard: ${newData}`)
     return newData;
 }
+
+export const selectTacticCard = (player, data) => {
+    if (data[`${player}Hand`].size > 6 || data["tacticCards"].size < 1) return data;
+
+    const tacticCardsList = Array.from(data["tacticCards"]);
+    const drawnCard = tacticCardsList[Math.floor(Math.random() * tacticCardsList.length)];
+
+    const newData = {
+        ...data,
+        [`${player}Hand`]: new Set([...data[`${player}Hand`], drawnCard]),
+        "tacticCards": new Set([...data["tacticCards"]].filter(card => card !== drawnCard)),
+    };
+    return newData;
+};
 
 export const updateNextAction = (data) => {
     const actionCycle = ["player1Play", "player1Draw", "player2Play", "player2Draw"];
@@ -173,16 +235,26 @@ export const updateNextAction = (data) => {
     
     const newData = { ...data };
     newData["nextAction"] = newNextAction;
-
-    return findClaimable(newData);
+    if (newNextAction === "player1Draw" || newNextAction === "player2Draw") return newData;
+    const player = newNextAction.slice(0, 7);
+    return findClaimableAndPlayable(newData, player);
+    // Manage the scenario where there are no places to play.
 };
 
-const findClaimable = (data) => {
+const findClaimableAndPlayable = (data, player) => {
+    const newPinsPlayable = {
+        troop: new Set(),
+        tactic: new Set()
+    };
     for (let i = 1; i <= 9; i++) {
         const pin = "pin" + i
         if (data[pin]["claimed"]) continue
         const p1HandComplete = data[pin]["player1"]["cardsPlayed"].length === 3;
         const p2HandComplete = data[pin]["player2"]["cardsPlayed"].length === 3;
+
+        if (!p1HandComplete && player === "player1") newPinsPlayable["troop"].add(pin);
+        else if (!p2HandComplete && player === "player2") newPinsPlayable["troop"].add(pin);
+        // Manage if Tactics are playable too;
 
         if (p1HandComplete && p2HandComplete) {
             const scorePlayer1 = calculateScore(pin, "player1", data);
@@ -202,10 +274,10 @@ const findClaimable = (data) => {
         }
     }
     return data
-}
+};
 
 const calculateMaxScore = (pin, player, data) => {
-    const remainingCards = findRemainingCards(data["used"])
+    const remainingCards = findRemainingCards(data["used"]);
 
     if (data[pin][player]["cardsPlayed"].length === 0) {
         return bestHandWithNoCardsPlayed(remainingCards);
@@ -467,6 +539,102 @@ const randomComputerMove = (data) => {
     return { card, pin };
 }
 
+const idealPin = (data) => {
+    const emptyPins = [];
+    const unfinishedPins = [];
+    for (let i = 1; i <= 9; i++) {
+        const pin = "pin" + i;
+        const cardsPlayed = data[pin]["player2"]["cardsPlayed"];
+        if (cardsPlayed.length === 0 && !data[pin]["claimed"]) {
+            emptyPins.push(pin);
+        } else if (cardsPlayed.length < 3 && !data[pin]["claimed"]) {
+            unfinishedPins.push(pin);
+        }
+    }
+    if (emptyPins.length > 0) {
+        // Return a random pin from the emptyPins array
+        const randomIndex = Math.floor(Math.random() * emptyPins.length);
+        return emptyPins[randomIndex];
+    } else if (unfinishedPins.length > 0) {
+        const randomIndex = Math.floor(Math.random() * unfinishedPins.length);
+        return unfinishedPins[randomIndex]; // Corrected this line to use unfinishedPins
+    } else {
+        console.log("Computer found no pin to play on.")
+        return null;
+    }
+}
+
+const cardPotentialScores = (data) => {
+    const remainingCards = findRemainingCards(data["used"]);
+    const hand = data["player2Hand"];
+
+    const scores = {};
+    const numberTally = {};
+
+    for (const card of hand) {
+        const color = card[0];
+        const number = parseInt(card.slice(1));
+
+        if (numberTally[number]) numberTally[number]++;
+        else numberTally[number] = 1;
+
+        const adjacents = [
+            color + (number - 2),
+            color + (number - 1),
+            color + (number + 1),
+            color + (number + 2)
+        ];
+
+        const inHand = [];
+        const inRemaining = [];
+
+        for (let i = 0; i < 4; i++) {
+            inHand[i] = hand.has(adjacents[i]);
+            inRemaining[i] = remainingCards.has(adjacents[i]);
+        }
+
+        let score = 0;
+
+        for (let i = 0; i < 3; i++) {
+            if (inHand[i] && inHand[i + 1]) {
+                score += 36;
+            } else if (inHand[i] && inRemaining[i + 1]) {
+                score += 18;
+            } else if (inRemaining[i] && inHand[i + 1]) {
+                score += 18;
+            } else if (inRemaining[i] && inRemaining[i + 1]) {
+                score += 6;
+            }
+        }
+
+        scores[card] = score;
+    }
+    for (const card of hand) {
+        const number = parseInt(card.slice(1));
+        scores[card] += number * numberTally[number];
+    }
+    return scores;
+}
+
+const idealCard = (data) => {
+    const scores = cardPotentialScores(data);
+
+    let max_score = 0;
+    let card;
+
+    for (const potentialCard in scores) {
+        if (scores[potentialCard] > max_score) {
+            card = potentialCard;
+            max_score = scores[potentialCard];
+        }
+    }
+
+    const pin = idealPin(data);
+
+    if (max_score > 0) return { card, pin }
+    else return randomComputerMove(data);
+}
+
 const tryForTrips = (data) => {
     for (const card of data["player2Hand"]) {
         for (let i = 1; i <= 9; i++) {
@@ -475,17 +643,23 @@ const tryForTrips = (data) => {
 
             if (length === 0 || data["claimed"][pin] || length === 3) {
                 continue;
-            }
+            } else if (length === 1) {
+                const cardPlayed = data[pin]["player2"]["cardsPlayed"][0];
 
-            const cardPlayed = data[pin]["player2"]["cardsPlayed"][0];
+                if (cardPlayed.slice(1) === card.slice(1)) {
+                    return { card, pin };
+                }
+            } else if (length === 2) {
+                const cardsPlayed = data[pin]["player2"]["cardsPlayed"];
 
-            if (cardPlayed.slice(1) === card.slice(1)) {
-                return { card, pin };
+                if (cardsPlayed[0].slice(1) === cardsPlayed[1].slice(1)&& cardsPlayed[0].slice(1) === card.slice(1)) {
+                    return { card, pin };
+                }
             }
         }
     }
 
-    return randomComputerMove(data);
+    return idealCard(data);
 }
 
 const tryForWedge = (data) => {
@@ -546,52 +720,9 @@ const findRemainingCards = (usedCards) => {
     }
     return remainingCards;
 };
-// eslint-disable-next-line
-const wedgePotential = (hand, usedCards) => {
-    const remainingCards = findRemainingCards(usedCards)
-
-    const scores = {};
-
-    for (const card of hand) {
-        const color = card[0];
-        const number = parseInt(card.slice(1));
-        const adjacents = [
-            color + (number - 2),
-            color + (number - 1),
-            color + (number + 1),
-            color + (number + 2)
-        ];
-
-        const inHand = [];
-        const inRemaining = [];
-
-        for (let i = 0; i < 4; i++) {
-            inHand[i] = hand.has(adjacents[i]);
-            inRemaining[i] = remainingCards.has(adjacents[i]);
-        }
-
-        let score = 0;
-
-        for (let i = 0; i < 3; i++) {
-            if (inHand[i] && inHand[i + 1]) {
-                score += 12;
-            } else if (inHand[i] && inRemaining[i + 1]) {
-                score += 4;
-            } else if (inRemaining[i] && inHand[i + 1]) {
-                score += 4;
-            } else if (inRemaining[i] && inRemaining[i + 1]) {
-                score += 1;
-            }
-        }
-
-        scores[card] = score;
-    }
-
-    return scores;
-};
 
 export const handlePlayer2ClaimPins = (data) => {
-    let newData = { ...data }
+    const newData = { ...data }
     const claimablePins = [];
     for (let i = 1; i <= 9; i++) {
         const pin = "pin" + i
@@ -601,13 +732,20 @@ export const handlePlayer2ClaimPins = (data) => {
         newData["claimed"][pin] = "player2";
         newData[pin]["claimed"] = true;
     }
+    const winner = checkGameOver(newData);
+    if (winner) {
+        newData["gameOver"] = winner;
+        console.log(`That's game over. ${winner} wins!`);
+    }
+
     return newData;
 };
 
 export const handlePlayer2PlayCard = (data) => {
     const newMoveData = tryForWedge(data);
-    const cardToPlay = newMoveData.card
-    const pinToPlayOn = newMoveData.pin
+    console.log(`player2 move: ${newMoveData.card}`);
+    const cardToPlay = newMoveData.card;
+    const pinToPlayOn = newMoveData.pin;
     return updateNextAction(playCard("player2", pinToPlayOn, cardToPlay, data));
 };
 
@@ -646,7 +784,67 @@ const hasConsecutivePins = (pins) => {
 
 export const resetGame = (winner, setGameData) => {
     console.log("Resetting game for winner:", winner);
-    alert(`${winner} wins!`);
     const newGameData = initializeGameData();
     setGameData(newGameData);
+};
+
+export const chooseCardToPlay = (cardValue, setCardToPlay) => {
+    const newCardToPlayObject = {
+        "troop": "",
+        "tacticColor": "",
+        "tacticSwap": "",
+        "tacticSteal": "",
+        "tacticChangePin": "",
+        "tacticSwitch": "",
+        "tacticNewTroops": ""
+    }
+
+    if (cardValue === "") {
+        setCardToPlay(newCardToPlayObject)
+        return
+    };
+
+    // Extract color and number from the cardValue
+    const color = cardValue[0] || "";
+    let number = parseInt(cardValue.slice(1)) || "";
+    
+    if (COLORS_SET.has(color)) newCardToPlayObject["troop"] = cardValue;
+    else if (color === 't') {
+        if (number < 4) newCardToPlayObject["tacticColor"] = cardValue;
+        else if (number === 4) newCardToPlayObject["tacticSwap"] = cardValue;
+        else if (number === 5) newCardToPlayObject["tacticSteal"] = cardValue;
+        else if (number > 5 && number < 9) newCardToPlayObject["tacticChangePin"] = cardValue;
+        else if (number === 9) newCardToPlayObject["tacticSwitch"] = cardValue;
+        else if (number === 10) newCardToPlayObject["tacticNewTroops"] = cardValue;
+    }
+    setCardToPlay(newCardToPlayObject);
+};
+
+// eslint-disable-next-line
+const playNewTroopsTactic = (data) => {
+    if (data["troopCards"].size === 0 || data["player1Hand"].size === 0) return data;
+    const newData = { ...data };
+    let sample = 1;
+    const cardsToRemove = [];
+
+    for (const card of newData["player1Hand"]) {
+        if (card[0] !== 't') {
+            newData["troopCards"].add(card);
+            cardsToRemove.push(card);
+            sample++;
+        }
+    }
+
+    for (const cardToRemove of cardsToRemove) {
+        newData["player1Hand"].delete(cardToRemove);
+    }
+
+    const troopCardsArray = Array.from(newData["troopCards"]);
+    const randomSample = new Set(getRandomSample(troopCardsArray, sample));
+    
+    for (const card of randomSample) {
+        newData["troopCards"].add(card);
+    }
+
+    return newData;
 };
