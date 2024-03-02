@@ -1,10 +1,8 @@
-// eslint-disable-next-line
-import React, { useContext, useState } from 'react';
+import React, { useContext } from 'react';
 import { AppContext } from '../App'
 import { resetGame } from '../utils';
 
 function GameOver() {
-    // eslint-disable-next-line
     const { gameData, setGameData } = useContext(AppContext);
 
     const play = () => {

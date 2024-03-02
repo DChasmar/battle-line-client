@@ -1,7 +1,7 @@
 import React, { useContext } from 'react'
 import { AppContext } from "../App";
-import Card from './Card';
 import { sortHand } from '../utils';
+import PlayerHandCard from './PlayerHandCard';
 
 function PlayerHand() {
     const { gameData } = useContext(AppContext);
@@ -17,7 +17,7 @@ function PlayerHand() {
         <div>
             <div className='player1-hand' key={"player1Hand"}>
             {sortedHand.map((cardValue, index) => (
-                <Card key={index} cardValue={cardValue} player1Hand/>
+                <PlayerHandCard key={index} cardValue={cardValue} />
             ))}
         </div>
         </div>

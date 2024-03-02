@@ -1,16 +1,15 @@
-// eslint-disable-next-line
-import React, { useState, useContext, useEffect } from 'react';
+import React, { useContext } from 'react';
 import { AppContext } from "../App";
-// eslint-disable-next-line
 import { selectTroopCard, selectTacticCard, updateNextAction } from '../utils';
+import { CARD_COLORS } from '../constants';
 
 function DeckCard( {troop, tactic} ) {
     const { gameData, setGameData } = useContext(AppContext);
 
     // Dynamically assign styles
     const styles = {
-      backgroundColor: troop ? '#999' : tactic ? '#ddd' : 'white',
-      fontSize: '9px',
+      backgroundColor: troop ? CARD_COLORS["T"] : tactic ? CARD_COLORS["t"] : 'white',
+      fontSize: '10px',
       justifyContent: 'center',
       cursor: gameData["nextAction"] === 'player1Draw' ? 'pointer' : 'default'
     }

@@ -3,22 +3,18 @@ import React, { useState, createContext, useEffect } from "react";
 import Board from './components/Board'
 import { initializeGameData, handlePlayer2ClaimPins, handlePlayer2PlayCard, handlePlayer2DrawCard, checkGameOver } from './utils';
 import Prompt from './components/Prompt';
-import GameOver from './components/GameOver';
+// import GameOver from './components/GameOver';
 import Instructions from './components/Instructions';
+import Boxscore from './components/Boxscore';
 
 export const AppContext = createContext();
 
 function App() {
   const [gameData, setGameData] = useState({});
-  const [cardToPlay, setCardToPlay] = useState({
-    "troop": "",
-    "tacticColor": "",
-    "tacticSwap": "",
-    "tacticSteal": "",
-    "tacticChangePin": "",
-    "tacticSwitch": "",
-    "tacticNewTroops": ""
-  });
+  const [cardToPlay, setCardToPlay] = useState("");
+  // A State variable to handle tactic operations, such as redeploy and traitor
+  const [cardToTactic, setCardToTactic] = useState({});
+
   const [claimedCount, setClaimedCount] = useState(0);
 
   const [showPrompt, setShowPrompt] = useState(true);
@@ -76,7 +72,10 @@ function App() {
 
 
   useEffect(() => {
-    console.log(gameData)
+    console.log(gameData);
+    console.log(`cardToPlay: ${cardToPlay}`);
+    console.log(`cardToTactic: ${cardToTactic}`);
+    // eslint-disable-next-line
   }, [gameData]);
 
   return (
@@ -87,16 +86,18 @@ function App() {
           setGameData,
           cardToPlay, 
           setCardToPlay,
+          cardToTactic, 
+          setCardToTactic,
           hidePrompt,
           toggleInstructions
         }}>
       {showPrompt && <Prompt />}
       <h2> Battle Line </h2>
-      <div>
+      <div style={{display: 'flex', flexDirection: 'row'}}>
         <Board />
+        <Boxscore />
       </div>
       {showInstructions && <Instructions />}
-      {gameData.gameOver && <GameOver />}
       </AppContext.Provider>
     </div>
   );

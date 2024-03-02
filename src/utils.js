@@ -1,4 +1,4 @@
-import { COLORS, COLORS_SET, CARDS_PER_COLOR, PINS, WEDGE_VALUE, TRIPS_VALUE, FLUSH_VALUE, STRAIGHT_VALUE } from './constants'
+import { COLORS, COLORS_SET, COLOR_REFERENCE, CARDS_PER_COLOR, PINS, WEDGE_VALUE, TRIPS_VALUE, FLUSH_VALUE, STRAIGHT_VALUE, TACTICS } from './constants'
 
 const buildTacticDeck = () => {
     const tacticCards = new Set();
@@ -93,8 +93,11 @@ export const initializeGameData = () => {
         "troop": pinSet,
         "tactic": pinSet
     }
-    data["tacticsPlayed"] = { "player1": 0, "player2": 0};
+
+    data["tacticsPlayed"] = { "player1": new Set(), "player2": new Set()};
     data["gameOver"] = false;
+    data["events"] = [];
+    data["discardedCards"] = [];
 
     return data;
 }
@@ -172,6 +175,14 @@ export const playCard = (player, pin, card, data) => {
         newData[pin]["firstToCompleteHand"] = checkFirstToCompletePinHand(pin, player, newData);
         newData[pin][player]["score"] = calculateScore(pin, player, newData);
     }
+
+    const color = COLORS_SET.has(card[0]) ? COLOR_REFERENCE[card[0]] : card[0] === 't' ? TACTICS[card].name : "Error finding card value";
+    const cardName = COLORS_SET.has(card[0]) ? `${parseInt(card.slice(1))} ${color}` : color;
+
+    const nextEventMessage = { description: `${player} played ${cardName} on Flag ${pin[3]}.` }
+
+    newData["events"].push(nextEventMessage);
+
     return newData
 }
 
@@ -179,7 +190,7 @@ const calculateScore = (pin, player, data) => {
     if (data[pin][player]["cardsPlayed"].length < 3) return;
 
     const colorValues = data[pin][player]["cardsPlayed"].map(card => card[0]);
-    const numberValues = data[pin][player]["cardsPlayed"].map(card => parseInt(card.slice(1))).sort();
+    const numberValues = data[pin][player]["cardsPlayed"].map(card => parseInt(card.slice(1))).sort((a, b) => a - b);
 
     const trips = numberValues.every(value => value === numberValues[0]);
     const flush = colorValues.every(value => value === colorValues[0]);
@@ -198,12 +209,14 @@ export const selectTroopCard = (player, data) => {
     const troopCardsList = Array.from(data["troopCards"]);
     const drawnCard = troopCardsList[Math.floor(Math.random() * troopCardsList.length)];
 
+    const nextEventMessage = { description: `${player} selected a Troop Card.` };
+
     const newData = {
         ...data,
         [`${player}Hand`]: new Set([...data[`${player}Hand`], drawnCard]),
         "troopCards": new Set([...data["troopCards"]].filter(card => card !== drawnCard)),
+        "events": [...data["events"], nextEventMessage]
     };
-    // console.log(`This is the newData in SelectTroopCard: ${newData}`)
     return newData;
 }
 
@@ -213,10 +226,13 @@ export const selectTacticCard = (player, data) => {
     const tacticCardsList = Array.from(data["tacticCards"]);
     const drawnCard = tacticCardsList[Math.floor(Math.random() * tacticCardsList.length)];
 
+    const nextEventMessage = { description: `${player} selected a Tactic Card.` };
+
     const newData = {
         ...data,
         [`${player}Hand`]: new Set([...data[`${player}Hand`], drawnCard]),
         "tacticCards": new Set([...data["tacticCards"]].filter(card => card !== drawnCard)),
+        "events": [...data["events"], nextEventMessage]
     };
     return newData;
 };
@@ -224,6 +240,8 @@ export const selectTacticCard = (player, data) => {
 export const updateNextAction = (data) => {
     const actionCycle = ["player1Play", "player1Draw", "player2Play", "player2Draw"];
     const currentIndex = actionCycle.indexOf(data["nextAction"]);
+
+    console.log("In ");
     
     if (currentIndex === -1) {
         console.error("Invalid nextAction value in data");
@@ -244,7 +262,9 @@ export const updateNextAction = (data) => {
 const findClaimableAndPlayable = (data, player) => {
     const newPinsPlayable = {
         troop: new Set(),
-        tactic: new Set()
+        playTactic: new Set(),
+        changePinTactic: new Set(),
+
     };
     for (let i = 1; i <= 9; i++) {
         const pin = "pin" + i
@@ -652,7 +672,7 @@ const tryForTrips = (data) => {
             } else if (length === 2) {
                 const cardsPlayed = data[pin]["player2"]["cardsPlayed"];
 
-                if (cardsPlayed[0].slice(1) === cardsPlayed[1].slice(1)&& cardsPlayed[0].slice(1) === card.slice(1)) {
+                if (cardsPlayed[0].slice(1) === cardsPlayed[1].slice(1) && cardsPlayed[0].slice(1) === card.slice(1)) {
                     return { card, pin };
                 }
             }
@@ -669,43 +689,55 @@ const tryForWedge = (data) => {
         const pin = "pin" + i;
 
         const length = data[pin]["player2"]["cardsPlayed"].length;
+        const cardsPlayed = data[pin]["player2"]["cardsPlayed"];
 
         if (length === 0 || data["claimed"][pin] || length === 3) {
             continue;
         } else if (length === 1) {
-            const playedCard = data[pin]["player2"]["cardsPlayed"][0];
+            const playedCard = cardsPlayed[0];
             const color = playedCard[0];
             const number = parseInt(playedCard.slice(1));
 
+            const twoLess = color + (number - 2);
             const oneLess = color + (number - 1);
             const oneMore = color + (number + 1);
+            const twoMore = color + (number + 2);
 
-            if (hand.has(oneLess)) {
-                const card = oneLess
+            if (hand.has(oneMore)) {
+                const card = oneMore;
                 return {card, pin};
-            } else if (hand.has(oneMore)) {
-                const card = oneMore
+            } else if (hand.has(oneLess)) {
+                const card = oneLess;
+                return {card, pin};
+            } else if (hand.has(twoMore)) {
+                const card = twoMore;
+                return {card, pin};
+            } else if (hand.has(twoLess)) {
+                const card = twoLess;
                 return {card, pin};
             }
         } else if (length === 2) {
-            const sortedHand = Array.from(hand).sort();
-            const color1 = sortedHand[0][0];
-            const color2 = sortedHand[1][0];
+            const color1 = cardsPlayed[0][0];
+            const color2 = cardsPlayed[1][0];
 
             if (color1 !== color2) {
                 continue;
             }
 
-            const number1 = parseInt(sortedHand[0].slice(1));
-            const oneLess = color1 + (number1 - 1);
-            const oneMore = color1 + (number1 + 2);
-
-            if (hand.has(oneLess)) {
-                const card = oneLess
-                return {card, pin};
-            } else if (hand.has(oneMore)) {
-                const card = oneMore
-                return {card, pin};
+            const numbers = [parseInt(cardsPlayed[0].slice(1)), parseInt(cardsPlayed[1].slice(1))].sort((a, b) => a - b);
+            if (numbers[1] - 2 === numbers[0]) {
+                const card = color1 + (numbers[0] + 1);
+                if (hand.has(card)) return {card, pin};
+            } else if (numbers[1] - 1 === numbers[0]) {
+                const oneMore = color1 + (numbers[0] + 1);
+                const oneLess = color1 + (numbers[0] - 1);
+                if (hand.has(oneMore)) {
+                    const card = oneMore;
+                    return {card, pin};
+                } else if (hand.has(oneLess)) {
+                    const card = oneLess;
+                    return {card, pin};
+                };
             }
         }
     }
@@ -731,11 +763,16 @@ export const handlePlayer2ClaimPins = (data) => {
     for (const pin of claimablePins) {
         newData["claimed"][pin] = "player2";
         newData[pin]["claimed"] = true;
+
+        const nextEventMessage = { description: `player2 claimed Pin ${pin[3]}.` };
+        newData["events"].push(nextEventMessage);
     }
+
     const winner = checkGameOver(newData);
+
     if (winner) {
         newData["gameOver"] = winner;
-        console.log(`That's game over. ${winner} wins!`);
+        newData["events"].push(`That's game over. ${winner} wins!`);
     }
 
     return newData;
@@ -787,39 +824,6 @@ export const resetGame = (winner, setGameData) => {
     const newGameData = initializeGameData();
     setGameData(newGameData);
 };
-
-export const chooseCardToPlay = (cardValue, setCardToPlay) => {
-    const newCardToPlayObject = {
-        "troop": "",
-        "tacticColor": "",
-        "tacticSwap": "",
-        "tacticSteal": "",
-        "tacticChangePin": "",
-        "tacticSwitch": "",
-        "tacticNewTroops": ""
-    }
-
-    if (cardValue === "") {
-        setCardToPlay(newCardToPlayObject)
-        return
-    };
-
-    // Extract color and number from the cardValue
-    const color = cardValue[0] || "";
-    let number = parseInt(cardValue.slice(1)) || "";
-    
-    if (COLORS_SET.has(color)) newCardToPlayObject["troop"] = cardValue;
-    else if (color === 't') {
-        if (number < 4) newCardToPlayObject["tacticColor"] = cardValue;
-        else if (number === 4) newCardToPlayObject["tacticSwap"] = cardValue;
-        else if (number === 5) newCardToPlayObject["tacticSteal"] = cardValue;
-        else if (number > 5 && number < 9) newCardToPlayObject["tacticChangePin"] = cardValue;
-        else if (number === 9) newCardToPlayObject["tacticSwitch"] = cardValue;
-        else if (number === 10) newCardToPlayObject["tacticNewTroops"] = cardValue;
-    }
-    setCardToPlay(newCardToPlayObject);
-};
-
 // eslint-disable-next-line
 const playNewTroopsTactic = (data) => {
     if (data["troopCards"].size === 0 || data["player1Hand"].size === 0) return data;
@@ -845,6 +849,53 @@ const playNewTroopsTactic = (data) => {
     for (const card of randomSample) {
         newData["troopCards"].add(card);
     }
+
+    return newData;
+};
+// eslint-disable-next-line
+const playValueTactic = (card, data) => {
+    if (TACTICS[card].name === 'Darius' || TACTICS[card].name === 'Alexander') {
+        // Check if the player has already played Darius or Alexander
+    };
+
+};
+// eslint-disable-next-line
+const playChangePinTactic = (card, data) => {
+
+};
+
+export const handleDiscard = (player, tacticUsed, cardDiscardedData, data) => {
+    const newData = { ...data };
+
+    if (!cardDiscardedData.card || !cardDiscardedData.pin || !cardDiscardedData.player) {
+        console.log(cardDiscardedData);
+        console.log("Error in handleDiscard");
+        return;
+    };
+    const card = cardDiscardedData.card;
+    const pin = cardDiscardedData.pin;
+    const playerDiscarded = cardDiscardedData.player;
+
+    // Check if the card exists in the cardsPlayed array
+    const cardsPlayed = newData[pin]?.[playerDiscarded]?.["cardsPlayed"];
+    if (!cardsPlayed) {
+        console.log("Card not found in cardsPlayed array");
+        return;
+    }
+
+    // Remove the card from the cardsPlayed array using filter
+    newData[pin][playerDiscarded]["cardsPlayed"] = cardsPlayed.filter((playedCard) => playedCard !== card);
+    newData["discardedCards"].push(card);
+    newData["tacticsPlayed"][player].add(tacticUsed);
+    newData["used"].add(tacticUsed);
+    newData[`${player}Hand`].delete(tacticUsed);
+
+    const color = COLORS_SET.has(card[0]) ? COLOR_REFERENCE[card[0]] : card[0] === 't' ? TACTICS[card].name : "Error finding card value";
+    const cardName = COLORS_SET.has(card[0]) ? `${parseInt(card.slice(1))} ${color}` : color;
+
+    const nextEventMessage = { description: `${player} used Tactic ${TACTICS[tacticUsed].name} to discard ${cardName} from Flag ${pin[3]}.` }
+
+    newData["events"].push(nextEventMessage);
 
     return newData;
 };
