@@ -5,7 +5,7 @@ import PlayerHand from './PlayerHand';
 import OpponentHand from './OpponentHand';
 import GameOver from './GameOver';
 import { AppContext } from "../App";
-import { TACTICS } from '../constants'
+import { TACTICS, SCOUT_MESSAGES } from '../constants'
 import { handleDiscard, updateNextAction } from '../utils'
 
 function Board() {
@@ -20,7 +20,13 @@ function Board() {
 
     const tacticsMayDiscard = new Set(["Deserter", "Redeploy"]);
 
-    const discard = cardToPlay && cardToPlay in TACTICS && tacticsMayDiscard.has(TACTICS[cardToPlay].name) && Object.keys(cardToTactic).length > 0;
+    const discard = cardToPlay && cardToPlay in TACTICS && tacticsMayDiscard.has(TACTICS[cardToPlay].name) && cardToTactic !== null;
+
+    const scout = cardToPlay && cardToPlay in TACTICS && TACTICS[cardToPlay].name === "Scout";
+    // Show Mud and Fog once they have been applied.
+    // Show four cards instead of three if mud has been applied.
+    // You cannot Desert mud if either player has played a fourth card.
+    // You can play mud and fog on the same pin.
 
     const handleDiscardClick = () => {
         const newData = updateNextAction(handleDiscard("player1", cardToPlay, cardToTactic, gameData));
@@ -39,6 +45,7 @@ function Board() {
                     </div>
                 ))}
             </div>
+            {scout && (<div>{SCOUT_MESSAGES[cardToTactic !== null ? cardToTactic.stage : 0]}</div>)}
             <div style = {{display: 'flex', flexDirection: 'row', justifyContent: 'center'}}>
                 <PlayerHand />
                 <Decks />

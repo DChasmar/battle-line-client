@@ -19,8 +19,8 @@ function OpponentPinCard({ cardValue, pin }) {
 
     const handleClick = () => {
       if (gameData["nextAction"] !== 'player1Play') return;
-      if (canSteal || canDesert) {
-        setCardToTactic({ card: cardValue, pin: pin, player: "player2" });
+      if ((canSteal && cardToPlay && TACTICS[cardToPlay].name === "Traitor") || (canDesert && cardToPlay && TACTICS[cardToPlay].name === "Deserter")) {
+        setCardToTactic({ card: cardValue, pin: pin, player: "player2", tactic: TACTICS[cardToPlay].name });
       }
     };
 

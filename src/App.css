@@ -34,7 +34,7 @@ body {
 
 .event-log {
   width: 300px;
-  height: 300px;
+  height: 200px;
   align-items: center;
   justify-content: center;
   background-color: #f0be82;
@@ -55,7 +55,7 @@ body {
 
 .board {
   width: 750px;
-  height: 600px;
+  height: 650px;
   background-color: var(--board-background-color);
   border: 2px solid var(--board-border-color);
   border-radius: 20px;
@@ -198,6 +198,10 @@ body {
   margin-bottom: 24px;
 }
 
+.scout-message {
+  font: 16px;
+}
+
 /* Prompt Styles */
 
 .prompt {
@@ -267,7 +271,6 @@ body {
   align-items: center;
   justify-content: center;
   background-color: rgba(0, 0, 0, 0.5);
-  
 }
 
 .game-over-content {

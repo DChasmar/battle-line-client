@@ -13,7 +13,7 @@ function App() {
   const [gameData, setGameData] = useState({});
   const [cardToPlay, setCardToPlay] = useState("");
   // A State variable to handle tactic operations, such as redeploy and traitor
-  const [cardToTactic, setCardToTactic] = useState({});
+  const [cardToTactic, setCardToTactic] = useState(null);
 
   const [claimedCount, setClaimedCount] = useState(0);
 
@@ -28,13 +28,14 @@ function App() {
 
   useEffect(() => {
     if (gameData && gameData["nextAction"]) {
-        if (gameData["nextAction"] === 'player2Play') {
-            const newGameData = handlePlayer2PlayCard(handlePlayer2ClaimPins(gameData));
-            setGameData(newGameData);
-        } else if (gameData["nextAction"] === 'player2Draw') {
-            const newGameData = handlePlayer2DrawCard(gameData);
-            setGameData(newGameData);
-        }
+      if (gameData["nextAction"] === 'player2Play') {
+        let newGameData = handlePlayer2ClaimPins(gameData);
+        if (!newGameData.gameOver) newGameData = handlePlayer2PlayCard(newGameData);
+        setGameData(newGameData);
+      } else if (gameData["nextAction"] === 'player2Draw') {
+        const newGameData = handlePlayer2DrawCard(gameData);
+        setGameData(newGameData);
+      }
     }
   // eslint-disable-next-line
   }, [gameData]);
@@ -44,7 +45,6 @@ function App() {
     for (const pin in gameData["claimed"]) {
       if (pin === "player1"  || pin === "player2") claimed++;
     }
-    // console.log(`Claimed = ${claimed}`)
     if (claimed === claimedCount) return;
 
     if (gameData && gameData["claimed"]) {
@@ -73,10 +73,13 @@ function App() {
 
   useEffect(() => {
     console.log(gameData);
-    console.log(`cardToPlay: ${cardToPlay}`);
-    console.log(`cardToTactic: ${cardToTactic}`);
-    // eslint-disable-next-line
   }, [gameData]);
+
+  useEffect(() => {
+    console.log(cardToPlay);
+    console.log(cardToTactic);
+    // eslint-disable-next-line
+  }, [cardToPlay, cardToTactic]);
 
   return (
     <div className="App">

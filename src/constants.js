@@ -86,7 +86,10 @@ const TACTIC_TYPES = {
     youTroopHand: new Set(['Steal']),
 }
 
-export const cardToPlayObject = {
-    "troop": "",
-    "tactic": "",
-}
+export const SCOUT_MESSAGES = [
+    "To use scout, draw three cards from either deck.",
+    "Draw two more cards.",
+    "Draw one more cards.",
+    "Select two cards from your hand to return to the top of the deck.",
+    "Return one more card from your hand."
+];

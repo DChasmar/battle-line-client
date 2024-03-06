@@ -1,7 +1,7 @@
 import React, { useContext } from 'react';
 import { AppContext } from "../App";
 import { CARD_COLORS, COLORS_SET, TACTICS } from '../constants'
-import { playCard, updateNextAction } from '../utils';
+import { handleTraitor, handleRedeploy, playCard, updateNextAction } from '../utils';
 
 function PlayerPinCard({ cardValue, pin }) {
     const { gameData, setGameData, cardToPlay, setCardToPlay, cardToTactic, setCardToTactic } = useContext(AppContext);
@@ -16,12 +16,9 @@ function PlayerPinCard({ cardValue, pin }) {
     let number = parseInt(cardValue.slice(1)) || "";
 
     const placementPlayable = cardToPlay && COLORS_SET.has(cardToPlay[0]) && !cardValue && gameData["player1PinsPlayable"]['troop'].has(pin);
-    const redeployable = cardToPlay && cardToPlay in TACTICS && TACTICS[cardToPlay].name === "Redeploy" && cardValue && !gameData[pin]["claimed"];
-    const actingTraitorous = cardToPlay && cardToPlay in TACTICS && TACTICS[cardToPlay].name === "Traitor" && !cardValue && !gameData[pin]["claimed"];
-
-    // Redeploy:
-    // Determine which cards can be redeployed.
-    // Once cardToRedploy is selected, provide option to discard, or a new placement for the card
+    const redeployable = cardToPlay && cardToPlay in TACTICS && TACTICS[cardToPlay].name === "Redeploy" && cardValue && !gameData[pin]["claimed"] && cardToTactic === null;
+    const redeployPlacement = cardToPlay && cardToPlay in TACTICS && TACTICS[cardToPlay].name === "Redeploy" && !cardValue && !gameData[pin]["claimed"] && cardToTactic !== null && cardToTactic.pin !== pin;
+    const actingTraitorous = cardToPlay && cardToPlay in TACTICS && TACTICS[cardToPlay].name === "Traitor" && cardToTactic !== null && !cardValue && !gameData[pin]["claimed"];
 
     const handleClick = () => {
       if (gameData["nextAction"] !== 'player1Play') return;
@@ -30,10 +27,21 @@ function PlayerPinCard({ cardValue, pin }) {
         const newData = updateNextAction(playCard("player1", pin, cardToPlay, gameData));
         setGameData(newData);
         setCardToPlay("");
-      } else if (redeployable) {
-        setCardToTactic(cardValue);
-      } else if (actingTraitorous && cardToTactic) {
-
+        setCardToTactic(null);
+      } else if (redeployable && cardToPlay && TACTICS[cardToPlay].name === "Redeploy") {
+        setCardToTactic({ card: cardValue, pin: pin, player: "player1", tactic: "Redeploy" });
+      } else if (actingTraitorous && cardToTactic.tactic === "Traitor") {
+        const destinationPin = pin;
+        const newData = updateNextAction(handleTraitor("player1", cardToPlay, cardToTactic, destinationPin, gameData));
+        setGameData(newData);
+        setCardToPlay("");
+        setCardToTactic(null);
+      } else if (redeployPlacement && cardToTactic.tactic === "Redeploy") {
+        const destinationPin = pin;
+        const newData = updateNextAction(handleRedeploy("player1", cardToPlay, cardToTactic, destinationPin, gameData));
+        setGameData(newData);
+        setCardToPlay("");
+        setCardToTactic(null);
       }
     };
 
@@ -45,8 +53,9 @@ function PlayerPinCard({ cardValue, pin }) {
         <div
           className='card'
           style={{ 
-            backgroundColor: CARD_COLORS[color], 
-            cursor: (placementPlayable || redeployable || actingTraitorous) ? 'pointer' : 'default' 
+            backgroundColor: CARD_COLORS[color],
+            color: (cardToTactic && cardToTactic.card === cardValue) ? 'white' : 'black', 
+            cursor: (placementPlayable || redeployable || redeployPlacement || actingTraitorous) ? 'pointer' : 'default' 
           }}
           onClick={handleClick}
         >

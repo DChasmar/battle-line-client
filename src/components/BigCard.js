@@ -37,7 +37,7 @@ function BigCard() {
     };
 
     // Convert card name to a format suitable for mapping
-    const iconName = cardInfo.name.replace(/\s+/g, '');
+    const iconName = cardInfo.name;
 
     // Get the corresponding icon for the card
     const icon = iconMap[iconName];

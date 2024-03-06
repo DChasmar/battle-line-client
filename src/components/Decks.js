@@ -5,8 +5,7 @@ import { AppContext } from "../App";
 import DeckCard from './DeckCard';
 
 function Decks() {
-    // eslint-disable-next-line
-    const { gameData, setGameData } = useContext(AppContext);
+    const { gameData } = useContext(AppContext);
     
     if (!gameData || !Object.keys(gameData).length) {
         console.log("Not working.")

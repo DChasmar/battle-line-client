@@ -1,19 +1,21 @@
 import React, { useContext } from 'react'
 import { AppContext } from "../App";
-import { checkGameOver } from '../utils';
+import { checkGameOver, handleFog, handleMud, updateNextAction } from '../utils';
 import PlayerPinCard from './PlayerPinCard';
 import OpponentPinCard from './OpponentPinCard';
 import { TACTICS } from '../constants';
 
 function Pin({ pinData, pin }) {
-    const { gameData, setGameData, cardToPlay } = useContext(AppContext);
+    const { gameData, setGameData, cardToPlay, setCardToPlay } = useContext(AppContext);
     const player1CardsPlayed = pinData["player1"].cardsPlayed || [];
     const player2CardsPlayed = pinData["player2"].cardsPlayed || [];
     const claimed = gameData["claimed"][pin];
 
     const pinNumber = pin[3];
 
-    const readyToAlterPin = cardToPlay && cardToPlay in TACTICS && (TACTICS[cardToPlay].name === "Fog" || TACTICS[cardToPlay].name === "Mud");
+    const readyToAlterPin = !claimed && cardToPlay && cardToPlay in TACTICS && (TACTICS[cardToPlay].name === "Fog" || TACTICS[cardToPlay].name === "Mud");
+    let changeTactic = null;
+    if (readyToAlterPin) changeTactic = TACTICS[cardToPlay].name;
 
     const renderCards = (playerCardsPlayed, player) => {
         const blankCards = Array(3 - playerCardsPlayed.length).fill("");
@@ -59,7 +61,15 @@ function Pin({ pinData, pin }) {
     }
 
     const playTactic = () => {
-        alert("Not yet programmed");
+        if (changeTactic === "Mud") {
+            const newData = updateNextAction(handleMud("player1", pin, cardToPlay, gameData));
+            setGameData(newData);
+            setCardToPlay("");
+        } else if (changeTactic === "Fog") {
+            const newData = updateNextAction(handleFog("player1", pin, cardToPlay, gameData));
+            setGameData(newData);
+            setCardToPlay("");
+        }
     };
 
     return (
@@ -75,11 +85,11 @@ function Pin({ pinData, pin }) {
             <div className='cards-played'>
                 {renderCards(player1CardsPlayed, 'player1')}
             </div>
-            {readyToAlterPin && !pinData["claimed"] && (
+            {readyToAlterPin && (
                 <button className='claim-button'
                 style={{ cursor: claimed ? 'default' : 'pointer' }}
                 onClick={playTactic}>
-                    Play Tactic
+                    {TACTICS[cardToPlay].name === "Fog" ? "Fog" : "Mud"}
                 </button>
             )}
             {pinData["player1"]["claimable"] && !pinData["claimed"] && gameData["nextAction"] === "player1Play" && (
