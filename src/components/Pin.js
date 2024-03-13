@@ -1,9 +1,10 @@
 import React, { useContext } from 'react'
 import { AppContext } from "../App";
-import { checkGameOver, handleFog, handleMud, updateNextAction } from '../utils';
 import PlayerPinCard from './PlayerPinCard';
 import OpponentPinCard from './OpponentPinCard';
 import { TACTICS } from '../constants';
+import { checkGameOver, updateNextAction } from '../utils/gamelogic';
+import { handleFog, handleMud } from '../utils/tacticlogic';
 
 function Pin({ pinData, pin }) {
     const { gameData, setGameData, cardToPlay, setCardToPlay } = useContext(AppContext);

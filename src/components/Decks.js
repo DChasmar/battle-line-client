@@ -1,7 +1,5 @@
-// eslint-disable-next-line
-import React, { useState, useContext, useEffect } from 'react';
+import React, { useContext } from 'react';
 import { AppContext } from "../App";
-// eslint-disable-next-line
 import DeckCard from './DeckCard';
 
 function Decks() {

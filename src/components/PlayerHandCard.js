@@ -1,7 +1,7 @@
 import React, { useContext } from 'react';
 import { AppContext } from "../App";
 import { CARD_COLORS, COLORS_SET, TACTICS } from '../constants'
-import { handleReturnCardToTopOfDeck, handleRemoveScoutFromHand } from '../utils'
+import { handleReturnCardToTopOfDeck, handleRemoveScoutFromHand } from '../utils/tacticlogic'
 
 function PlayerHandCard({ cardValue }) {
     const { gameData, setGameData, cardToPlay, setCardToPlay, cardToTactic, setCardToTactic } = useContext(AppContext);
@@ -15,17 +15,25 @@ function PlayerHandCard({ cardValue }) {
     const color = cardValue[0] || "";
     let number = parseInt(cardValue.slice(1)) || "";
 
+    const dariusAndAlexander = new Set(["Darius", "Alexander"])
+
     const troop = COLORS_SET.has(color);
     const tactic = color === 't';
-    // Add condition for Darius and Alexander
 
     const canPlayTactic = gameData["tacticsPlayed"].player1.size <= gameData["tacticsPlayed"].player2.size;
+    const playedDariusOrAlexander = gameData["tacticsPlayed"].player1.has("Darius") || gameData["tacticsPlayed"].player1.has("Alexander");
     const selected = cardValue === cardToPlay;
     const scouting = cardToPlay in TACTICS && TACTICS[cardToPlay].name === "Scout" && cardToTactic !== null;
 
     const handleClick = () => {
       if (gameData["nextAction"] !== 'player1Play' || (scouting && cardToTactic.stage < 3)) return;
-      if (!canPlayTactic && tactic) return;
+      if (tactic && !canPlayTactic) {
+        alert("You have played more Tactic cards than your opponent.")
+        return;
+      } else if (tactic && playedDariusOrAlexander && dariusAndAlexander.has(TACTICS[cardValue].name)) {
+        alert("You cannot play both Darius and Alexander.")
+        return;
+      };
       setCardToPlay(cardValue);
       if (cardToTactic) setCardToTactic(null);
     };

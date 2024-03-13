@@ -1,6 +1,6 @@
 import React, { useContext } from 'react';
 import { AppContext } from '../App'
-import { resetGame } from '../utils';
+import { resetGame } from '../utils/gamedata';
 
 function GameOver() {
     const { gameData, setGameData } = useContext(AppContext);

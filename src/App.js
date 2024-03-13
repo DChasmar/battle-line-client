@@ -1,11 +1,11 @@
 import './App.css';
 import React, { useState, createContext, useEffect } from "react";
 import Board from './components/Board'
-import { initializeGameData, handlePlayer2ClaimPins, handlePlayer2PlayCard, handlePlayer2DrawCard, checkGameOver } from './utils';
 import Prompt from './components/Prompt';
-// import GameOver from './components/GameOver';
 import Instructions from './components/Instructions';
 import Boxscore from './components/Boxscore';
+import { initializeGameData } from './utils/gamedata';
+import { handlePlayer2ClaimPins, handlePlayer2PlayCard, handlePlayer2DrawCard } from './utils/computerbot'
 
 export const AppContext = createContext();
 
@@ -14,8 +14,6 @@ function App() {
   const [cardToPlay, setCardToPlay] = useState("");
   // A State variable to handle tactic operations, such as redeploy and traitor
   const [cardToTactic, setCardToTactic] = useState(null);
-
-  const [claimedCount, setClaimedCount] = useState(0);
 
   const [showPrompt, setShowPrompt] = useState(true);
   const [showInstructions, setShowInstructions] = useState(false);
@@ -37,26 +35,6 @@ function App() {
         setGameData(newGameData);
       }
     }
-  // eslint-disable-next-line
-  }, [gameData]);
-
-  useEffect(() => {
-    let claimed = 0;
-    for (const pin in gameData["claimed"]) {
-      if (pin === "player1"  || pin === "player2") claimed++;
-    }
-    if (claimed === claimedCount) return;
-
-    if (gameData && gameData["claimed"]) {
-      const winner = checkGameOver(gameData);
-      if (winner) {
-        const newData = { ...gameData };
-        newData["gameOver"] = winner;
-        setGameData(newData);
-        console.log(`That's game over. ${winner} wins!`);
-      }
-    }
-    setClaimedCount(claimed);
   // eslint-disable-next-line
   }, [gameData]);
 

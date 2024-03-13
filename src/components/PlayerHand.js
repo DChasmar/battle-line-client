@@ -1,7 +1,7 @@
 import React, { useContext } from 'react'
 import { AppContext } from "../App";
-import { sortHand } from '../utils';
 import PlayerHandCard from './PlayerHandCard';
+import { sortHand } from '../utils/gamedata';
 
 function PlayerHand() {
     const { gameData } = useContext(AppContext);

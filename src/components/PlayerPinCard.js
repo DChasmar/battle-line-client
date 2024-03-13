@@ -1,7 +1,8 @@
 import React, { useContext } from 'react';
 import { AppContext } from "../App";
-import { CARD_COLORS, COLORS_SET, TACTICS } from '../constants'
-import { handleTraitor, handleRedeploy, playCard, updateNextAction } from '../utils';
+import { CARD_COLORS, COLORS_SET, TACTICS, TACTIC_TYPES } from '../constants'
+import { playCard, updateNextAction } from '../utils/gamelogic';
+import { handleTraitor, handleRedeploy } from '../utils/tacticlogic';
 
 function PlayerPinCard({ cardValue, pin }) {
     const { gameData, setGameData, cardToPlay, setCardToPlay, cardToTactic, setCardToTactic } = useContext(AppContext);
@@ -15,7 +16,7 @@ function PlayerPinCard({ cardValue, pin }) {
     const color = cardValue[0] || "";
     let number = parseInt(cardValue.slice(1)) || "";
 
-    const placementPlayable = cardToPlay && COLORS_SET.has(cardToPlay[0]) && !cardValue && gameData["player1PinsPlayable"]['troop'].has(pin);
+    const placementPlayable = cardToPlay && (COLORS_SET.has(cardToPlay[0]) || TACTIC_TYPES.playCard.has(TACTICS[cardToPlay].name)) && !cardValue && gameData["player1PinsPlayable"].has(pin) && !gameData[pin]['claimed'];
     const redeployable = cardToPlay && cardToPlay in TACTICS && TACTICS[cardToPlay].name === "Redeploy" && cardValue && !gameData[pin]["claimed"] && cardToTactic === null;
     const redeployPlacement = cardToPlay && cardToPlay in TACTICS && TACTICS[cardToPlay].name === "Redeploy" && !cardValue && !gameData[pin]["claimed"] && cardToTactic !== null && cardToTactic.pin !== pin;
     const actingTraitorous = cardToPlay && cardToPlay in TACTICS && TACTICS[cardToPlay].name === "Traitor" && cardToTactic !== null && !cardValue && !gameData[pin]["claimed"];
@@ -48,6 +49,8 @@ function PlayerPinCard({ cardValue, pin }) {
     if (cardValue in TACTICS) {
       number = TACTICS[cardValue].symbol;
     }
+
+    // IF MUD, SHRINK THE HEIGHT OF EACH CARD
 
     return (
         <div

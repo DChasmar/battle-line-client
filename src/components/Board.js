@@ -6,7 +6,8 @@ import OpponentHand from './OpponentHand';
 import GameOver from './GameOver';
 import { AppContext } from "../App";
 import { TACTICS, SCOUT_MESSAGES } from '../constants'
-import { handleDiscard, updateNextAction } from '../utils'
+import { updateNextAction } from '../utils/gamelogic'
+import { handleDiscard } from '../utils/tacticlogic'
 
 function Board() {
     const { gameData, setGameData, cardToPlay, setCardToPlay, cardToTactic, setCardToTactic } = useContext(AppContext);

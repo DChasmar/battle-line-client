@@ -1,6 +1,6 @@
 import React, { useContext } from 'react';
 import { AppContext } from "../App";
-import { selectTroopCard, selectTacticCard, updateNextAction } from '../utils';
+import { selectTroopCard, selectTacticCard, updateNextAction } from '../utils/gamelogic';
 import { CARD_COLORS, TACTICS } from '../constants';
 
 function DeckCard( {troop, tactic} ) {

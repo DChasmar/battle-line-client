@@ -1,7 +1,9 @@
 // Constants
-export const COLORS = ['r', 'o', 'y', 'g', 'b', 'v'];
+export const COLORS_ARRAY = ['r', 'o', 'y', 'g', 'b', 'v'];
 export const COLORS_SET = new Set(['r', 'o', 'y', 'g', 'b', 'v']);
 export const CARDS_PER_COLOR = 10;
+export const NUMBERS_ARRAY = [10, 9, 8, 7, 6, 5, 4, 3, 2, 1];
+export const NUMBERS_SET = new Set([10, 9, 8, 7, 6, 5, 4, 3, 2, 1]);
 export const PINS = 9;
 export const WEDGE_VALUE = 100000;
 export const TRIPS_VALUE = 10000;
@@ -29,28 +31,28 @@ export const COLOR_REFERENCE = {
 }
 
 export const TACTICS = {
-    't1': {name: "Darius", symbol: "Da", type: "playCard",
+    't1': {name: "Darius", symbol: "Da", possibleColors: COLORS_ARRAY, possibleNumbers: NUMBERS_ARRAY, type: "playCard",
         description: "Wild card. Can respresent any color or number. Cannot play if have already played Alexander."
     },
-    't2': {name: "Alexander", symbol: "A", type: "playCard", 
+    't2': {name: "Alexander", symbol: "Al", possibleColors: COLORS_ARRAY, possibleNumbers: NUMBERS_ARRAY, type: "playCard", 
         description: "Wild card. Can respresent any color or number. Cannot play if have already played Darius."
     },
-    't3': {name: "Campaign Cavalry", symbol: "CC", type: "playCard", 
+    't3': {name: "Campaign Cavalry", symbol: "CC", possibleColors: COLORS_ARRAY, possibleNumbers: [8], type: "playCard", 
         description: "Can represent 8 of any color."
     },
-    't4': {name: "Shield Bearer", symbol: "SB", type: "playCard", 
+    't4': {name: "Shield Bearer", symbol: "SB", possibleColors: COLORS_ARRAY, possibleNumbers: [3, 2, 1], type: "playCard", 
         description: "Can represent 1, 2, or 3 of any color."
     },
-    't5': {name: "Traitor", symbol: "T", type: "youTroop", 
+    't5': {name: "Traitor", symbol: "Tr", type: "youTroop", 
         description: "Steal a Troop card played by the opponent on an unclaimed flag. Place it on your side in front of an unclaimed flag."
     },
     't6': {name: "Deserter", symbol: "De", type: "youAny", 
         description: "Discard any Troop or Tactic card played by the opponent on an unclaimed flag."
     },
-    't7': {name: "Mud", symbol: "M", type: "changePin", 
+    't7': {name: "Mud", symbol: "Mu", type: "changePin", 
         description: "Makes it so a flag is based on the best four-card arrangement, instead of three."
     },
-    't8': {name: "Fog", symbol: "F", type: "changePin", 
+    't8': {name: "Fog", symbol: "Fo", type: "changePin", 
         description: "Makes it so a flag is based on highest total; no other arrangment has value."
     },
     't9': {name: "Redeploy", symbol: "Re", type: "meAny", 
@@ -62,19 +64,19 @@ export const TACTICS = {
 }
 
 export const TACTICS_VARIANT = {
-    't1': {name: "Red", symbol: "R", type: "playCard"},
-    't2': {name: "Blue", symbol: "B", type: "playCard"},
-    't3': {name: "Yellow", symbol: "Y", type: "playCard"},
+    't1': {name: "Red", symbol: "Re", type: "playCard"},
+    't2': {name: "Blue", symbol: "Bl", type: "playCard"},
+    't3': {name: "Yellow", symbol: "Ye", type: "playCard"},
     't4': {name: "Swap", symbol: "Sa", type: "youTroopMeTroop"},
     't5': {name: "Steal", symbol: "St", type: "youTroopHand"},
     't6': {name: "Troop 5", symbol: "T5", type: "changePin"},
     't7': {name: "Aim Low", symbol: "AL", type: "changePin"},
-    't8': {name: "Flip", symbol: "F", type: "changePin"},
+    't8': {name: "Flip", symbol: "Fl", type: "changePin"},
     't9': {name: "Switch", symbol: "Si", type: "meTwoAny"},
     't10': {name: "New Troops", symbol: "NT", type: "newCards"}
 }
-// eslint-disable-next-line
-const TACTIC_TYPES = {
+
+export const TACTIC_TYPES = {
     playCard: new Set(['Darius', 'Alexander', 'Campaign Cavalry', 'Shield Bearer', 'Red', 'Blue', 'Yellow']),
     changePin: new Set(['Mud', 'Fog', 'Troop 5', 'Aim Low', 'Flip']),
     youTroop: new Set(['Traitor']),

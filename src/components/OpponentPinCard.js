@@ -24,6 +24,8 @@ function OpponentPinCard({ cardValue, pin }) {
       }
     };
 
+    // IF MUD, SHRINK THE HEIGHT OF EACH CARD
+    
     return (
         <div
           className='card'
