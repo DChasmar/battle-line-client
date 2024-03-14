@@ -56,8 +56,8 @@ export const initializeGameData = () => {
             player["score"] = null;
             player["claimable"] = false;
         }
-
-        data[pin] = {"player1": player1, "player2": player2, "claimed": false, "firstToCompleteHand": false, "tacticPlayed": false};
+        
+        data[pin] = {"player1": player1, "player2": player2, "claimed": false, "firstToCompleteHand": false, "tacticsPlayed": []};
     }
 
     const dealCardData = dealCards(troopCards);

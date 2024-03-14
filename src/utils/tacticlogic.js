@@ -137,7 +137,7 @@ export const handleRemoveScoutFromHand = (player, card, data) => {
 
 export const handleMud = (player, pin, card, data) => {
     const newData = { ...data };
-    newData[pin]["tacticPlayed"] = "Mud";
+    newData[pin]["tacticsPlayed"].push("Mud");
 
     data[`${player}Hand`].delete(card);
     data['used'].add(card);
@@ -147,7 +147,7 @@ export const handleMud = (player, pin, card, data) => {
 
 export const handleFog = (player, pin, card, data) => {
     const newData = { ...data };
-    newData[pin]["tacticPlayed"] = "Fog";
+    newData[pin]["tacticsPlayed"].push("Fog");
 
     data[`${player}Hand`].delete(card);
     data['used'].add(card);

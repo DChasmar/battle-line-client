@@ -2,7 +2,7 @@ import { COLORS_SET, COLOR_REFERENCE, TACTICS } from '../constants'
 import { calculateScore, calculateMaxScore } from './scores'
 
 const checkFirstToCompletePinHand = (player, pin, data) => {
-    const numberOfCards = data[pin]["tacticPlayed"] === "Mud" ? 4 : 3;
+    const numberOfCards = data[pin]["tacticsPlayed"].includes("Mud") ? 4 : 3;
     const otherPlayer = player === "player1" ? "player2" : "player1";
     if (data[pin][otherPlayer]["cardsPlayed"].length === numberOfCards) {
         return otherPlayer;
@@ -10,11 +10,8 @@ const checkFirstToCompletePinHand = (player, pin, data) => {
 };
 
 export const playCard = (player, pin, card, data) => {
-    const numberOfCards = data[pin]["tacticPlayed"] === "Mud" ? 4 : 3;
-    // I am pretty sure this check is not doing anything. I block this condition earlier.
-    if (data[pin][player]["cardsPlayed"].length === numberOfCards || data[pin]["claimed"]) {
-        console.error("Error in playCard");
-    };
+    const numberOfCards = data[pin]["tacticsPlayed"].includes("Mud") ? 4 : 3;
+    
     const newData = { ...data };
     
     newData[pin][player]["cardsPlayed"].push(card);
@@ -94,7 +91,7 @@ const findClaimableAndPlayable = (player, data) => {
 
     for (let i = 1; i <= 9; i++) {
         const pin = "pin" + i;
-        const numberOfCards = data[pin]["tacticPlayed"] === "Mud" ? 4 : 3;
+        const numberOfCards = data[pin]["tacticsPlayed"].includes("Mud") ? 4 : 3;
         if (data[pin]["claimed"]) continue;
         const p1HandComplete = data[pin]["player1"]["cardsPlayed"].length === numberOfCards;
         const p2HandComplete = data[pin]["player2"]["cardsPlayed"].length === numberOfCards;
