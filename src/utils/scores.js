@@ -1,4 +1,4 @@
-import { COLORS_ARRAY, NUMBERS_ARRAY, WEDGE_VALUE, TRIPS_VALUE, FLUSH_VALUE, STRAIGHT_VALUE, TACTICS } from '../constants'
+import { COLORS_ARRAY, NUMBERS_SET, NUMBERS_ARRAY, WEDGE_VALUE, TRIPS_VALUE, FLUSH_VALUE, STRAIGHT_VALUE, TACTICS, COLORS_SET } from '../constants'
 import { findRemainingCards } from './gamedata'
 
 const countTactics = (arr) => {
@@ -116,6 +116,34 @@ export const calculateScore = (player, pin, data) => {
 const maxMudScore = (player, pin, remainingCards, otherScore, data) => {
     const fog = data[pin]["tacticsPlayed"].includes("Fog");
     if (fog) return maxFogScore(player, pin, otherScore, data);
+
+    const cardsPlayed = data[pin][player]["cardsPlayed"];
+    const tacticCount = countTactics(cardsPlayed);
+
+    const numberOfCards = 4;
+
+    if (cardsPlayed.length === 0) return noCardsPlayed(numberOfCards, remainingCards, otherScore);
+    else if (cardsPlayed.length === 1) {
+        if (tacticCount === 0) return oneTroopPlayed(player, pin, remainingCards, otherScore, data);
+        else if (tacticCount === 1) return mudOneTacticPlayed(player, pin, remainingCards, otherScore, data);
+        else {
+            console.error("Error in maxMudScore. Length 1.");
+            return 0;
+        }
+    } else if (cardsPlayed.length === 2) {
+        if (tacticCount === 0) return 0;
+        else if (tacticCount === 1) return 0;
+        else if (tacticCount === 2) return 0;
+        else {
+            console.error("Error in maxMudScore. Length 2.");
+            return 0;
+        }
+    } else if (cardsPlayed.length === 3) {
+        
+    } else {
+        console.error("Error in maxMudScore.");
+        return 0;
+    }
 };
 
 const maxFogScore = (player, pin, remainingCards, data) => {
@@ -143,10 +171,10 @@ export const calculateMaxScore = (player, pin, otherScore, data) => {
 
     const cardsPlayed = data[pin][player]["cardsPlayed"];
     const tacticCount = countTactics(cardsPlayed);
+    const numberOfCards = 3;
 
-    if (cardsPlayed.length === 0) {
-        return noCardsPlayed(remainingCards, otherScore);
-    } else if (cardsPlayed.length === 1) {
+    if (cardsPlayed.length === 0) return noCardsPlayed(numberOfCards, remainingCards, otherScore);
+    else if (cardsPlayed.length === 1) {
         if (tacticCount === 1) return oneTacticPlayed(player, pin, remainingCards, otherScore, data);
         else return oneTroopPlayed(player, pin, remainingCards, otherScore, data);
     } else if (cardsPlayed.length === 2) {
@@ -173,11 +201,13 @@ const getRemainingByColorArrays = (remainingCards) => {
     };
 
     remainingCards.forEach(card => {
-        remainingByColorArrays[card[0]].push(parseInt(card.slice(1)));
+        const color = card[0];
+        const number = parseInt(card.slice(1));
+        remainingByColorArrays[color].push(number);
     });
 
     // Sort numbers from least to greatest
-    for (const color of remainingByColorArrays) {
+    for (const color in remainingByColorArrays) {
         remainingByColorArrays[color].sort((a, b) => a - b);
     }
 
@@ -228,110 +258,115 @@ const getRemainingNumbersObject = (remainingCards) => {
     return numbersRemaining;
 };
 
-const canWedge0 = (remainingByColorSets) => {
-    for (let number = 10; number >= 3; number--) {
-        for (const color of COLORS_ARRAY) {
-            if (remainingByColorSets[color].has(number) &&
-            remainingByColorSets[color].has(number - 1) &&
-            remainingByColorSets[color].has(number - 2)) {
-                return WEDGE_VALUE + number;
-            }
-        }
-    }
-
-    return WEDGE_VALUE;
-};
-
-const canTrips0 = (numbersRemainingObject) => {
+const canTrips = (numbersSet, cardsNeeded, numbersRemainingObject) => {
     for (let number = 10; number >= 1; number--) {
-        if (numbersRemainingObject[number] >= 3) return TRIPS_VALUE + number;
+        if (numbersSet.has(number) && numbersRemainingObject[number] && numbersRemainingObject[number] >= cardsNeeded) return TRIPS_VALUE + number;
     }
-    return TRIPS_VALUE;
-};
+    return 0;
+}
 
-const canFlush0 = (remainingByColorArrays) => {
-    let maxFlush = FLUSH_VALUE;
-
-    for (const color in remainingByColorArrays) {
-        if (remainingByColorArrays[color].length >= 3) {
-            maxFlush = Math.max(maxFlush, remainingByColorArrays[color].slice(-3).reduce((acc, num) => acc + num, 0));
+const canWedge0 = (numberOfCards, remainingByColorArrays) => {
+    let max_wedge = 0;
+    for (const color of COLORS_ARRAY) {
+        const arr = remainingByColorArrays[color];
+        for (let i = arr.length - 1; i >= numberOfCards - 1; i--) {
+            if (arr[i] - (numberOfCards - 1) === arr[i - (numberOfCards - 1)]) max_wedge = Math.max(max_wedge, WEDGE_VALUE + arr[i]);
         }
     }
-    return maxFlush;
+    return max_wedge;
 };
 
-const canStraight0 = (numbersRemainingObject) => {
-    for (let number = 10; number >= 3; number--) {
-        if (numbersRemainingObject[number] && numbersRemainingObject[number - 1] && numbersRemainingObject[number - 2]) {
-            return STRAIGHT_VALUE + number;
-        }
+const canStraight0 = (numberOfCards, numbersRemainingObject) => {
+    let sequence = 0;
+    for (let number = 10; number >= 1; number--) {
+        if (numbersRemainingObject[number] && numbersRemainingObject[number] >= 1) sequence++;
+        else sequence = 0;
+        if (sequence === numberOfCards) return STRAIGHT_VALUE + number + numberOfCards - 1;
     }
 
-    return STRAIGHT_VALUE;
+    return 0;
 };
 
-const noCardsPlayed = (remainingCards, otherScore) => {
-    if (remainingCards.size < 3) {
+const noCardsPlayed = (numberOfCards, remainingCards, otherScore) => {
+    if (remainingCards.size < numberOfCards) {
+        console.log("There are not enough cards remaining to form a full hand.");
         return 0;
     }
 
     let score;
 
-    const remainingByColorSets = getRemainingByColorSets(remainingCards);
+    const remainingByColorArrays = getRemainingByColorArrays(remainingCards);
 
-    score = canWedge0(remainingByColorSets);
+    score = canWedge0(numberOfCards, remainingByColorArrays);
+
     if (score > WEDGE_VALUE) return score;
-    if (otherScore > score) return 0;
+    if (otherScore > WEDGE_VALUE) return 0;
 
     const numbersRemainingObject = getRemainingNumbersObject(remainingCards);
 
-    score = canTrips0(numbersRemainingObject);
+    score = canTrips(NUMBERS_SET, numberOfCards, numbersRemainingObject);
     if (score > TRIPS_VALUE) return score;
-    if (otherScore > score) return 0;
+    if (otherScore > TRIPS_VALUE) return 0;
 
-    const remainingByColorArrays = getRemainingByColorArrays(remainingCards);
+    for (const color of COLORS_SET) {
+        score = Math.max(score, canFlush(0, numberOfCards, remainingByColorArrays[color]));
+    }
 
-    score = canFlush0(remainingByColorArrays);
     if (score > FLUSH_VALUE) return score;
-    if (otherScore > score) return 0;
+    if (otherScore > FLUSH_VALUE) return 0;
     
-    score = canStraight0(numbersRemainingObject);
+    score = canStraight0(numberOfCards, numbersRemainingObject);
     if (score > STRAIGHT_VALUE) return score;
-    if (otherScore > score) return 0;
+    if (otherScore > STRAIGHT_VALUE) return 0;
 
-    return maxSum(0, 3, numbersRemainingObject);
+    return maxSum(0, numberOfCards, numbersRemainingObject);
 };
 
 // Mud
 // Fog
 
-const canWedge1 = (color, number, remainingCards) => {
-    if (remainingCards.has(`${color}${number + 1}`) && remainingCards.has(`${color}${number + 2}`)) return WEDGE_VALUE + number + 2;
-    else if (remainingCards.has(`${color}${number - 1}`) && remainingCards.has(`${color}${number + 1}`)) return WEDGE_VALUE + number + 1;
-    else if (remainingCards.has(`${color}${number - 2}`) && remainingCards.has(`${color}${number - 1}`)) return WEDGE_VALUE + number;
-    else return WEDGE_VALUE;
+const canWedge1 = (color, number, numberOfCards, remainingCards) => {
+    const offsetArrays = {
+        3: [-2, -1, 1, 2],
+        4: [-3, -2, -1, 1, 2, 3]
+    }
+
+    const offsets = offsetArrays[numberOfCards];
+    let sequence = 0;
+
+    for (let i = offsets.length - 1; i >= 0; i--) {
+        const card = `${color}${number + offsets[i]}`
+        if (remainingCards.has(card)) {
+            sequence++;
+            if (sequence === numberOfCards - 1) return WEDGE_VALUE + number + Math.max(0, offsets[i + numberOfCards - 2]);
+        } else sequence = 0;
+        
+    }
+    return WEDGE_VALUE;
 };
 
-const canTrips1 = (number, remainingNumbersObject) => {
-    if (remainingNumbersObject[number] && remainingNumbersObject[number] >= 2) return TRIPS_VALUE + number;
-    else return TRIPS_VALUE;
+const canFlush = (currentSum, cardsNeeded, arr) => {
+    if (arr.length >= cardsNeeded) {
+        return FLUSH_VALUE + addValuesAtEndOfArray(currentSum, cardsNeeded, arr);
+    } else return 0;
 };
 
-const canFlush1 = (number, numbersOfColorRemaining) => {
-    if (numbersOfColorRemaining.length >= 2) {
-        return FLUSH_VALUE + number + numbersOfColorRemaining.slice(-2).reduce((sum, num) => sum + num, 0);
-    } else return FLUSH_VALUE;
-};
+const canStraight1 = (number, numberOfCards, numbersRemainingObject) => {
+    const offsetArrays = {
+        3: [-2, -1, 1, 2],
+        4: [-3, -2, -1, 1, 2, 3]
+    }
 
-const canStraight1 = (number, numbersRemaining) => {
-    const twoMore = numbersRemaining[number + 2];
-    const oneMore = numbersRemaining[number + 1];
-    const oneLess = numbersRemaining[number - 1];
-    const twoLess = numbersRemaining[number - 2];
+    const offsets = offsetArrays[numberOfCards];
+    let sequence = 0;
 
-    if (oneMore && twoMore) return STRAIGHT_VALUE + number + 2;
-    else if (oneLess && oneMore) return STRAIGHT_VALUE + number + 1;
-    else if (twoLess && oneLess) return STRAIGHT_VALUE + number;
+    for (let i = offsets.length - 1; i >= 0; i--) {
+        const currentNumber = number + offsets[i];
+        if (numbersRemainingObject[currentNumber] && numbersRemainingObject[currentNumber] >= 1) {
+            sequence++;
+            if (sequence === numberOfCards - 1) return STRAIGHT_VALUE + Math.max(number, currentNumber);
+        } else sequence = 0;
+    }
 
     return STRAIGHT_VALUE;
 };
@@ -350,52 +385,65 @@ const maxSum = (currentSum, numbersToAdd, numbersRemainingObject) => {
 };
 
 const oneTroopPlayed = (player, pin, remainingCards, otherScore, data) => {
-    let score;
     const color = data[pin][player]["cardsPlayed"][0][0];
     const number = parseInt(data[pin][player]["cardsPlayed"][0].slice(1));
 
-    score = canWedge1(color, number, remainingCards);
-    // We return WEDGE_VALUE without any increment if there is not potential WEDGE
+    const numberOfCards = data[pin]["tacticsPlayed"].includes("Mud") ? 4 : 3;
+
+    let score;
+
+    score = canWedge1(color, number, numberOfCards, remainingCards);
+    // We return WEDGE_VALUE without any increment if there is not a potential WEDGE;
     if (score > WEDGE_VALUE) return score;
-    if (otherScore > score) return 0;
+    if (otherScore > WEDGE_VALUE) return 0;
 
     const numbersRemainingObject = getRemainingNumbersObject(remainingCards);
     
-    score = canTrips1(number, numbersRemainingObject);
+    score = canTrips(new Set(number), numberOfCards - 1, numbersRemainingObject);
+
     if (score > TRIPS_VALUE) return score;
-    if (otherScore > score) return 0;
+    if (otherScore > TRIPS_VALUE) return 0;
 
     const numbersOfColorRemaining = getRemainingOfOneColor(color, remainingCards);
 
-    score = canFlush1(number, numbersOfColorRemaining);
-    if (score > FLUSH_VALUE) return score;
-    if (otherScore > score) return 0;
+    score = canFlush(number, numberOfCards - 1, numbersOfColorRemaining);
 
-    score = canStraight1(number, numbersRemainingObject);
+    if (score > FLUSH_VALUE) return score;
+    if (otherScore > FLUSH_VALUE) return 0;
+
+    score = canStraight1(number, numberOfCards, numbersRemainingObject);
     if (score > STRAIGHT_VALUE) return score;
-    if (otherScore > score) return 0;
+    if (otherScore > STRAIGHT_VALUE) return 0;
     
     // Just total sum;
-    return maxSum(number, 2, numbersRemainingObject);
+    return maxSum(number, numberOfCards - 1, numbersRemainingObject);
 };
 
 const canWedge1Any = (colorsArray, numbersSet, remainingByColorArrays) => { 
     let max_value = WEDGE_VALUE;
+
     for (const color of colorsArray) {
-        if (remainingByColorArrays[color] && remainingByColorArrays[color].length >= 2) {
-            const numbersOfColorRemaining = remainingByColorArrays[color];
+        const numbersOfColorRemaining = remainingByColorArrays[color];
+        if (numbersOfColorRemaining && numbersOfColorRemaining.length >= 2) {
             for (let i = numbersOfColorRemaining.length - 1; i >= 1; i--) {
-                if (numbersOfColorRemaining[i] - numbersOfColorRemaining[i - 1] === 1) {
-                    if (numbersSet.has(numbersOfColorRemaining[i] + 1)) {
-                        max_value = Math.max(max_value, WEDGE_VALUE + numbersOfColorRemaining[i] + 1);
+                const currentNumber = numbersOfColorRemaining[i];
+                const previousNumber = numbersOfColorRemaining[i - 1];
+                if (currentNumber - previousNumber === 1) {
+                    if (numbersSet.has(currentNumber + 1)) {
+                        max_value = Math.max(max_value, WEDGE_VALUE + currentNumber + 1);
                         continue;
-                    } else if (numbersSet.has(numbersOfColorRemaining[i])) {
-                        max_value = Math.max(max_value, WEDGE_VALUE + numbersOfColorRemaining[i]);
+                    } else if (numbersSet.has(currentNumber - 2)) {
+                        max_value = Math.max(max_value, WEDGE_VALUE + currentNumber);
                         continue;
-                    }                    
-                } else if (numbersOfColorRemaining[i] - numbersOfColorRemaining[i - 1] === 2 && numbersSet.has(numbersOfColorRemaining[i] - 1)) {
-                    max_value = Math.max(max_value, WEDGE_VALUE + numbersOfColorRemaining[i]);
-                    continue
+                    } else if (i >= 2 && currentNumber - numbersOfColorRemaining[i - 2] === 2 && numbersSet.has(currentNumber - 1)) {
+                        max_value = Math.max(max_value, WEDGE_VALUE + currentNumber);
+                        continue;
+                    }
+                } else if (currentNumber - previousNumber === 2) {
+                    if (numbersSet.has(currentNumber - 1)) {
+                        max_value = Math.max(max_value, WEDGE_VALUE + currentNumber);
+                        continue;
+                    }
                 };
             }
         }
@@ -403,34 +451,56 @@ const canWedge1Any = (colorsArray, numbersSet, remainingByColorArrays) => {
     return max_value;
 };
 
-const canTrips1Any = (numbersArray, numbersRemainingObject) => {
-    for (const number of numbersArray) {
-        if (numbersRemainingObject >= 2) return TRIPS_VALUE + number;
-    }
-    return TRIPS_VALUE;
-};
+const mudOneTacticPlayed = (player, pin, remainingCards, otherScore, data) => {
+    const card = data[pin][player]["cardsPlayed"][0];
 
-const canFlush1Any = (number, colorsArray, remainingByColorArrays) => {
-    let max_flush = FLUSH_VALUE;
-    for (const color of colorsArray) {
-        if (remainingByColorArrays[color] >= 2) {
-            max_flush = Math.max(max_flush, FLUSH_VALUE + number + remainingByColorArrays[color].slice(-2).reduce((sum, num) => sum + num, 0));
-        };
-    }
-    return max_flush;
-};
+    const numberOfCards = 4;
+    
+    const possibleNumbersArray = TACTICS[card].possibleNumbers;
+    const possibleNumbersSet = new Set(possibleNumbersArray);
+    const possibleColors = new Set(TACTICS[card].possibleColors);
 
-const canStraight1Any = (numbersArray, numbersRemainingObject) => {
-    for (const number of numbersArray) {
-        if (numbersRemainingObject[number + 1] && numbersRemainingObject[number + 2]) return STRAIGHT_VALUE + number + 2;
-        else if (numbersRemainingObject[number - 1] && numbersRemainingObject[number + 1]) return STRAIGHT_VALUE + number + 1;
-        else if (numbersRemainingObject[number - 2] && numbersRemainingObject[number - 1]) return STRAIGHT_VALUE + number;
+    let score;
+
+    const remainingByColorSets = getRemainingByColorSets(remainingCards);
+
+    for (const color in possibleColors) {
+        score = Math.max(score, WEDGE_VALUE + consecutiveOneTactic(remainingByColorSets[color], possibleNumbersSet, numberOfCards));
     }
-    return STRAIGHT_VALUE;
+
+    if (score > WEDGE_VALUE) return score;
+    if (otherScore > WEDGE_VALUE) return 0;
+
+    const numbersRemainingObject = getRemainingNumbersObject(remainingCards);
+
+    score = canTrips(possibleNumbersSet, numberOfCards - 1, numbersRemainingObject);
+
+    if (score > TRIPS_VALUE) return score;
+    if (otherScore > TRIPS_VALUE) return 0;
+
+    const remainingByColorArrays = getRemainingByColorArrays(remainingCards);
+
+    for (const color of possibleColors) {
+        score = Math.max(score, canFlush(possibleNumbersArray[0], numberOfCards - 1, remainingByColorArrays[color]));
+    }
+
+    if (score > FLUSH_VALUE) return score;
+    if (otherScore > FLUSH_VALUE) return 0;
+
+    const troopSet = new Set(Object.keys(numbersRemainingObject));
+
+    score = STRAIGHT_VALUE + consecutiveOneTactic(troopSet, possibleNumbersSet, numberOfCards);
+
+    if (score > STRAIGHT_VALUE) return score;
+    if (otherScore > STRAIGHT_VALUE) return 0;
+
+    return maxSum(possibleNumbersArray[0], numberOfCards - 1, numbersRemainingObject);
 };
 
 const oneTacticPlayed = (player, pin, remainingCards, otherScore, data) => {
     const card = data[pin][player]["cardsPlayed"][0];
+
+    const numberOfCards = 3;
     
     const possibleNumbersArray = TACTICS[card].possibleNumbers;
     const possibleNumbersSet = new Set(possibleNumbersArray);
@@ -443,26 +513,30 @@ const oneTacticPlayed = (player, pin, remainingCards, otherScore, data) => {
     score = canWedge1Any(possibleColors, possibleNumbersSet, remainingByColorArrays);
 
     if (score > WEDGE_VALUE) return score;
-    if (otherScore > score) return 0;
+    if (otherScore > WEDGE_VALUE) return 0;
 
     const numbersRemainingObject = getRemainingNumbersObject(remainingCards);
 
-    score = canTrips1Any(possibleNumbersArray, numbersRemainingObject);
+    score = canTrips(possibleNumbersSet, numberOfCards - 1, numbersRemainingObject);
 
     if (score > TRIPS_VALUE) return score;
-    if (otherScore > score) return 0;
+    if (otherScore > TRIPS_VALUE) return 0;
 
-    score = canFlush1Any(possibleNumbersArray[0], COLORS_ARRAY, remainingByColorArrays);
+    for (const color of possibleColors) {
+        score = Math.max(score, canFlush(possibleNumbersArray[0], numberOfCards - 1, remainingByColorArrays[color]));
+    }
 
     if (score > FLUSH_VALUE) return score;
-    if (otherScore > score) return 0;
+    if (otherScore > FLUSH_VALUE) return 0;
 
-    score = canStraight1Any(possibleNumbersSet, numbersRemainingObject);
+    const troopSet = new Set(Object.keys(numbersRemainingObject));
+
+    score = STRAIGHT_VALUE + consecutiveOneTactic(troopSet, possibleNumbersSet, numberOfCards);
 
     if (score > STRAIGHT_VALUE) return score;
-    if (otherScore > score) return 0;
+    if (otherScore > STRAIGHT_VALUE) return 0;
 
-    return maxSum(possibleNumbersArray[0], 2, numbersRemainingObject);
+    return maxSum(possibleNumbersArray[0], numberOfCards - 1, numbersRemainingObject);
 };
 
 const twoTroopsPlayed = (player, pin, remainingCards, otherScore, data) => {
@@ -575,44 +649,14 @@ const oneTroopOneTacticPlayed = (player, pin, remainingCards, otherScore, data) 
     return maxSum(number + possibleNumbersArray[0], 1, numbersRemainingObject);
 };
 
-const canWedge2Any = (colorsSet1, numbersSet1, colorsSet2, numbersSet2, remainingByColorArrays) => { 
-    let max_value = WEDGE_VALUE;
-    for (const color of colorsSet1) {
-        if (!colorsSet2.has(color)) continue;
-        if (remainingByColorArrays[color] && remainingByColorArrays[color].length >= 1) {
-            const numbersOfColorRemaining = remainingByColorArrays[color];
-            for (let i = numbersOfColorRemaining.length - 1; i >= 0; i--) {
-                if (twoSetsHaveBothValues(numbersSet1, numbersSet2, numbersOfColorRemaining[i] + 1, numbersOfColorRemaining[i] + 2)) {
-                    max_value = Math.max(max_value, WEDGE_VALUE + numbersOfColorRemaining[i] + 2);
-                    continue;
-                } else if (twoSetsHaveBothValues(numbersSet1, numbersSet2, numbersOfColorRemaining[i] - 1, numbersOfColorRemaining[i] + 1)) {
-                    max_value = Math.max(max_value, WEDGE_VALUE + numbersOfColorRemaining[i] + 1);
-                    continue;
-                } else if (twoSetsHaveBothValues(numbersSet1, numbersSet2, numbersOfColorRemaining[i] - 2, numbersOfColorRemaining[i] - 1)) {
-                    max_value = Math.max(max_value, WEDGE_VALUE + numbersOfColorRemaining[i]);
-                    continue;
-                };
-            }
-        }
+const canWedge2Any = (numbersSet1, numbersSet2, colorArray) => { 
+    for (let i = colorArray.length - 1; i >= 0; i--) {
+        const currentNumber = colorArray[i];
+        if (twoSetsHaveBothValues(numbersSet1, numbersSet2, currentNumber + 1, currentNumber + 2)) return currentNumber + 2;
+        else if (twoSetsHaveBothValues(numbersSet1, numbersSet2, currentNumber - 1, currentNumber + 1)) return currentNumber + 1;
+        else if (twoSetsHaveBothValues(numbersSet1, numbersSet2, currentNumber - 2, currentNumber - 1)) return currentNumber;
     }
-    return max_value;
-};
-
-const canTrips2Any = (numbersSet1, numbersSet2, numbersRemainingObject) => {
-    for (let number = 10; number >= 1; number--) {
-        if (numbersSet1.has(number) && numbersSet2.has(number) && numbersRemainingObject[number] && numbersRemainingObject[number] >= 1) return TRIPS_VALUE + number;
-    }
-    return TRIPS_VALUE;
-};
-
-const canFlush2Any = (number1, colorSet1, number2, colorSet2, remainingByColorArrays) => {
-    let max_flush = FLUSH_VALUE;
-    for (const color of colorSet1) {
-        if (!colorSet2.has(color) || !remainingByColorArrays[color] || remainingByColorArrays[color].length < 1) continue;
-        const maxValueOfColorArray = remainingByColorArrays[color][remainingByColorArrays[color].length - 1];
-        max_flush = Math.max(max_flush, FLUSH_VALUE + number1 + number2 + maxValueOfColorArray);
-    }
-    return max_flush;
+    return 0;
 };
 
 const canStraight2Any = (numbersSet1, numbersSet2, numbersRemainingObject) => {
@@ -625,10 +669,13 @@ const canStraight2Any = (numbersSet1, numbersSet2, numbersRemainingObject) => {
     return STRAIGHT_VALUE;
 };
 
-const twoTacticsPlayed = (player, pin, remainingCards, otherScore, data) => {
+// eslint-disable-next-line
+const mudTwoTacticsPlayed = (player, pin, remainingCards, otherScore, data) => {
     const cardsPlayed = data[pin][player]["cardsPlayed"];
     const tactic1 = cardsPlayed[0];
     const tactic2 = cardsPlayed[1];
+
+    const numberOfCards = 4;
 
     const possibleNumbersArray1 = TACTICS[tactic1].possibleNumbers;
     const possibleNumbersSet1 = new Set(possibleNumbersArray1);
@@ -638,31 +685,113 @@ const twoTacticsPlayed = (player, pin, remainingCards, otherScore, data) => {
     const possibleNumbersSet2 = new Set(possibleNumbersArray2);
     const possibleColors2 = new Set(TACTICS[tactic2].possibleColors);
 
-    const remainingByColorArrays = getRemainingByColorArrays(remainingCards);
+    const commonColors = new Set();
+    possibleColors1.forEach(color => {
+        if (possibleColors2.has(color)) {
+            commonColors.add(color);
+        }
+    });
+
+    const remainingByColorSets = getRemainingByColorSets(remainingCards);
 
     let score;
     
-    score = canWedge2Any(possibleColors1, possibleNumbersSet1, possibleColors2, possibleNumbersSet2, remainingByColorArrays);
+    for (const color of commonColors) {
+        score = Math.max(score, WEDGE_VALUE + consecutiveTwoTactics(remainingByColorSets[color], possibleNumbersSet1, possibleNumbersSet2, numberOfCards));
+    }
 
     if (score > WEDGE_VALUE) return score;
-    if (otherScore > score) return 0;
+    if (otherScore > WEDGE_VALUE) return 0;
 
     const numbersRemainingObject = getRemainingNumbersObject(remainingCards);
 
-    score = canTrips2Any(possibleNumbersSet1, possibleNumbersSet2, numbersRemainingObject);
+    const commonNumbers = new Set();
+    possibleNumbersSet1.forEach(number => {
+        if (possibleNumbersSet2.has(number)) {
+            commonNumbers.add(number);
+        }
+    });
+
+    score = canTrips(commonNumbers, numberOfCards - 2, numbersRemainingObject);
 
     if (score > TRIPS_VALUE) return score;
-    if (otherScore > score) return 0;
+    if (otherScore > TRIPS_VALUE) return 0;
 
-    score = canFlush2Any(possibleNumbersArray1[0], possibleColors1, possibleNumbersArray2[0], possibleColors1, remainingByColorArrays);
+    const remainingByColorArrays = getRemainingByColorArrays(remainingCards);
+
+    for (const color of commonColors) {
+        score = Math.max(score, canFlush(possibleNumbersArray1[0] + possibleNumbersArray2[0], numberOfCards - 2, remainingByColorArrays[color]));
+    }
 
     if (score > FLUSH_VALUE) return score;
-    if (otherScore > score) return 0;
+    if (otherScore > FLUSH_VALUE) return 0;
 
     score = canStraight2Any(possibleNumbersSet1, possibleNumbersSet2, numbersRemainingObject);
 
     if (score > STRAIGHT_VALUE) return score;
-    if (otherScore > score) return 0;
+    if (otherScore > STRAIGHT_VALUE) return 0;
+
+    return maxSum(possibleNumbersArray1[0] + possibleNumbersArray2[0], 1, numbersRemainingObject);
+};
+
+const twoTacticsPlayed = (player, pin, remainingCards, otherScore, data) => {
+    const cardsPlayed = data[pin][player]["cardsPlayed"];
+    const tactic1 = cardsPlayed[0];
+    const tactic2 = cardsPlayed[1];
+
+    const numberOfCards = 3;
+
+    const possibleNumbersArray1 = TACTICS[tactic1].possibleNumbers;
+    const possibleNumbersSet1 = new Set(possibleNumbersArray1);
+    const possibleColors1 = new Set(TACTICS[tactic1].possibleColors);
+
+    const possibleNumbersArray2 = TACTICS[tactic2].possibleNumbers;
+    const possibleNumbersSet2 = new Set(possibleNumbersArray2);
+    const possibleColors2 = new Set(TACTICS[tactic2].possibleColors);
+
+    const commonColors = new Set();
+    possibleColors1.forEach(color => {
+        if (possibleColors2.has(color)) {
+            commonColors.add(color);
+        }
+    });
+
+    const remainingByColorArrays = getRemainingByColorArrays(remainingCards);
+
+    let score;
+
+    for (const color of commonColors) {
+        score = Math.max(score, WEDGE_VALUE + canWedge2Any(possibleNumbersSet1, possibleNumbersSet2, numberOfCards, remainingByColorArrays[color]));
+    }
+
+    if (score > WEDGE_VALUE) return score;
+    if (otherScore > WEDGE_VALUE) return 0;
+
+    const numbersRemainingObject = getRemainingNumbersObject(remainingCards);
+
+    const commonNumbers = new Set();
+    possibleNumbersSet1.forEach(number => {
+        if (possibleNumbersSet2.has(number)) {
+            commonNumbers.add(number);
+        }
+    });
+
+    score = canTrips(commonNumbers, numberOfCards - 2, numbersRemainingObject);
+
+    if (score > TRIPS_VALUE) return score;
+    if (otherScore > TRIPS_VALUE) return 0;
+
+    for (const color of commonColors) {
+        score = Math.max(score, canFlush(possibleNumbersArray1[0] + possibleNumbersArray2[0], numberOfCards - 2, remainingByColorArrays[color]));
+    }
+
+    if (score > FLUSH_VALUE) return score;
+    if (otherScore > FLUSH_VALUE) return 0;
+
+    score = canStraight2Any(possibleNumbersSet1, possibleNumbersSet2, numbersRemainingObject);
+
+    if (score > STRAIGHT_VALUE) return score;
+    if (otherScore > STRAIGHT_VALUE) return 0;
 
     return maxSum(possibleNumbersArray1[0] + possibleNumbersArray2[0], 1, numbersRemainingObject);
 };
@@ -767,4 +896,76 @@ const oneTroopTwoTactics = (player, pin, data) => {
     else if (straightPlus1) return STRAIGHT_VALUE + number + 1;
     else if (straight) return STRAIGHT_VALUE + number;
     else return number + possibleNumbersArray1[0] + possibleNumbersArray2[0];
+};
+
+// Helper functions:
+// Check if two sets have four consecutive values. One set must have three of the values, and the other set must have the other value.
+
+// eslint-disable-next-line
+const consecutiveOneTactic = (troopSet, tacticSet, numberOfCards) => {
+    for (let currentNumber = 10; currentNumber >= numberOfCards; currentNumber--) {
+        if (!troopSet.has(currentNumber) && !tacticSet.has(currentNumber)) continue;
+        let tacticNeeded = false;
+        let tacticUsed = false;
+        for (let offset = 0; offset <= numberOfCards - 1; offset++) {
+            const smallerNumber = currentNumber - offset;
+            if (!troopSet.has(smallerNumber) && !tacticSet.has(smallerNumber)) continue;
+            else if (!troopSet.has(smallerNumber)) {
+                if (tacticNeeded) continue;
+                else {
+                    tacticNeeded = true;
+                    tacticUsed = true;
+                };
+            } else if (tacticSet.has(smallerNumber)) tacticUsed = true;
+            if (offset === numberOfCards - 1 && tacticUsed) return currentNumber;
+        }
+    }
+    return 0;
+};
+
+// eslint-disable-next-line
+const consecutiveTwoTactics = (troopSet, tacticSet1, tacticSet2, numberOfCards) => {
+    for (let currentNumber = 10; currentNumber >= numberOfCards - 1; currentNumber--) {
+        if (!troopSet.has(currentNumber) && !tacticSet1.has(currentNumber) && !tacticSet2.has(currentNumber)) continue;
+        let tactic1Needed = false;
+        let tactic1Used = false;
+        let tactic2Needed = false;
+        let tactic2Used = false;
+        for (let offset = 0; offset <= numberOfCards - 1; offset++) {
+            const smallerNumber = currentNumber - offset;
+            if (!troopSet.has(smallerNumber) && !tacticSet1.has(smallerNumber) && !tacticSet2.has(smallerNumber)) continue;
+            else if (!troopSet.has(smallerNumber))
+                if (!tacticSet1.has(smallerNumber)) {
+                    if (tactic2Needed) continue;
+                    else {
+                        tactic2Needed = true;
+                        tactic2Used = true;
+                    }
+                } else if (!tacticSet2.has(smallerNumber)) {
+                    if (tactic1Needed) continue;
+                    else {
+                        tactic1Needed = true;
+                        tactic1Used = true;
+                };
+            } 
+            
+            if (tacticSet1.has(smallerNumber)) tactic1Used = true;
+            if (tacticSet2.has(smallerNumber)) tactic2Used = true;
+
+            if (offset === numberOfCards - 1 && tactic1Used && tactic2Used) return currentNumber;
+        }
+    }
+    return 0;
+};
+
+// I should be able to make the above function work for Mud and non-Mud scenarios.
+// rename consecutiveOneTacticNoTroops
+// can also create consecutiveTwoTacticsNoTroops
+
+const addValuesAtEndOfArray = (currentSum, numbersNeeded, arr) => {
+    let sum = currentSum;
+    for (let i = arr.length - numbersNeeded; i < arr.length; i++) {
+        sum += arr[i];
+    }
+    return sum;
 };
