@@ -14,12 +14,17 @@ function Pin({ pinData, pin }) {
 
     const pinNumber = pin[3];
 
+    const mudded = pinData["tacticsPlayed"].includes("Mud");
+    const fogged = pinData["tacticsPlayed"].includes("Fog");
+
+    const numberOfCards = mudded ? 4 : 3;
+
     const readyToAlterPin = !claimed && cardToPlay && cardToPlay in TACTICS && (TACTICS[cardToPlay].name === "Fog" || TACTICS[cardToPlay].name === "Mud");
     let changeTactic = null;
     if (readyToAlterPin) changeTactic = TACTICS[cardToPlay].name;
 
     const renderCards = (playerCardsPlayed, player) => {
-        const blankCards = Array(3 - playerCardsPlayed.length).fill("");
+        const blankCards = Array(numberOfCards - playerCardsPlayed.length).fill("");
         let filledCards = []
         if (player === "player1") {
             filledCards = playerCardsPlayed.concat(blankCards);
@@ -32,9 +37,7 @@ function Pin({ pinData, pin }) {
             return filledCards.map((cardValue, index) => (
                 <OpponentPinCard key={index} cardValue={cardValue} pin={pin} />
             ));
-        }
-    
-        
+        }  
     };
 
     const handleClaimClick = () => {
@@ -81,7 +84,8 @@ function Pin({ pinData, pin }) {
             <div
             className="circle"
             style = {{
-                translateY: claimed === "player1" ? '20px' : claimed === "player2" ? '-20px' : 'inherit'
+                translateY: claimed === "player1" ? '20px' : claimed === "player2" ? '-20px' : 'inherit',
+                backgroundColor: mudded ? 'brown' : fogged ? 'grey' : 'red'
             }}>{pinNumber}</div>
             <div className='cards-played'>
                 {renderCards(player1CardsPlayed, 'player1')}

@@ -10,6 +10,8 @@ function OpponentPinCard({ cardValue, pin }) {
       return null; // or return a loading indicator or an empty div
     }
 
+    const mudded = gameData[pin]["tacticsPlayed"].includes("Mud");
+
     // Extract color and number from the cardValue
     const color = cardValue[0] || "";
     let number = parseInt(cardValue.slice(1)) || "";
@@ -23,8 +25,6 @@ function OpponentPinCard({ cardValue, pin }) {
         setCardToTactic({ card: cardValue, pin: pin, player: "player2", tactic: TACTICS[cardToPlay].name });
       }
     };
-
-    // IF MUD, SHRINK THE HEIGHT OF EACH CARD
     
     return (
         <div
@@ -32,11 +32,12 @@ function OpponentPinCard({ cardValue, pin }) {
           style={{ 
             backgroundColor: CARD_COLORS[color],
             color: (cardToTactic && cardToTactic.card === cardValue) ? 'white' : 'black',
-            cursor: (canSteal || canDesert) ? 'pointer' : 'default' 
+            cursor: (canSteal || canDesert) ? 'pointer' : 'default',
+            height: mudded ? '35px' : '50px'
           }}
           onClick={handleClick}
         >
-            {number !== 0 ? number : ""}
+            { color === 't' ? TACTICS[cardValue].symbol : number }
         </div>
     );
 }

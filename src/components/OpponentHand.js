@@ -16,7 +16,7 @@ function OpponentHand() {
         <div>
             <div className='player2-hand' key={"player2Hand"}>
                 {hand.map((cardValue, index) => (
-                    <OpponentHandCard key={index} cardValue={cardValue} player2Hand />
+                    <OpponentHandCard key={index} cardValue={cardValue} />
                 ))}
             </div>
         </div>

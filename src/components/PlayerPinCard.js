@@ -12,6 +12,8 @@ function PlayerPinCard({ cardValue, pin }) {
       return null; // or return a loading indicator or an empty div
     }
 
+    const mudded = gameData[pin]["tacticsPlayed"].includes("Mud");
+
     // Extract color and number from the cardValue
     const color = cardValue[0] || "";
     let number = parseInt(cardValue.slice(1)) || "";
@@ -58,7 +60,8 @@ function PlayerPinCard({ cardValue, pin }) {
           style={{ 
             backgroundColor: CARD_COLORS[color],
             color: (cardToTactic && cardToTactic.card === cardValue) ? 'white' : 'black', 
-            cursor: (placementPlayable || redeployable || redeployPlacement || actingTraitorous) ? 'pointer' : 'default' 
+            cursor: (placementPlayable || redeployable || redeployPlacement || actingTraitorous) ? 'pointer' : 'default',
+            height: mudded ? '35px' : '50px'
           }}
           onClick={handleClick}
         >

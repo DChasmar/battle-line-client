@@ -23,7 +23,7 @@ const buildTroopDeck = () => {
     return troopCards;
 };
 
-const disguiseOpponentHand = (hand) => {
+export const disguiseOpponentHand = (hand) => {
     // The hand is a set
     let tacticNumber = 0;
     const concealedHand = [];

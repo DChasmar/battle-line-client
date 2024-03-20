@@ -6,7 +6,7 @@ function Decks() {
     const { gameData } = useContext(AppContext);
     
     if (!gameData || !Object.keys(gameData).length) {
-        console.log("Not working.")
+        console.log("Decks not working.")
         return null; // or return a loading indicator or an empty div
     }
 

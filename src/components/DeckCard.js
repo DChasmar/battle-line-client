@@ -6,6 +6,11 @@ import { CARD_COLORS, TACTICS } from '../constants';
 function DeckCard( {troop, tactic} ) {
     const { gameData, setGameData, cardToPlay, cardToTactic, setCardToTactic } = useContext(AppContext);
 
+    if (!gameData || !Object.keys(gameData).length) {
+      console.log("DeckCard not working.")
+      return null;
+    }
+
     const scout = cardToPlay && cardToPlay in TACTICS && TACTICS[cardToPlay].name === "Scout";
 
     // Dynamically assign styles
@@ -17,6 +22,9 @@ function DeckCard( {troop, tactic} ) {
     }
 
     const text = troop ? "Troop" : tactic ? "Tactic" : null
+
+    const player1HandArray = [...gameData.player1Hand];
+    const player1HandTroopCount = player1HandArray.filter(item => item[0] !== 't').length;
 
     const handleClick = () => {
       if (gameData["nextAction"] !== 'player1Draw') return;
@@ -33,6 +41,11 @@ function DeckCard( {troop, tactic} ) {
         const newData = updateNextAction(selectTroopCard('player1', false, gameData));
         setGameData(newData);
       } else if (tactic) {
+        if (player1HandTroopCount < 1) {
+          console.log(`troopCount is ${player1HandTroopCount}`)
+          alert("You must have at least one troop card in your hand.");
+          return;
+        }
         const newData = updateNextAction(selectTacticCard('player1', false, gameData));
         setGameData(newData);
       }

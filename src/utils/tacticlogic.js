@@ -26,7 +26,7 @@ export const handleDiscard = (player, tacticUsed, cardDiscardedData, data) => {
     // Remove the card from the cardsPlayed array using filter
     newData[pin][playerDiscarded]["cardsPlayed"] = cardsPlayed.filter((playedCard) => playedCard !== card);
     newData["discardedCards"].push(card);
-    newData["tacticsPlayed"][player].add(tacticUsed);
+    newData["tacticsPlayed"][player].add(TACTICS[tacticUsed].name);
     newData["used"].add(tacticUsed);
     newData[`${player}Hand`].delete(tacticUsed);
 
@@ -60,7 +60,7 @@ export const handleRedeploy = (player, tacticUsed, cardRedeployData, destination
 
     newData[pin][player]["cardsPlayed"] = cardsPlayed.filter((playedCard) => playedCard !== card);
     newData[destinationPin][player]["cardsPlayed"].push(card);
-    newData["tacticsPlayed"][player].add(tacticUsed);
+    newData["tacticsPlayed"][player].add(TACTICS[tacticUsed].name);
     newData["used"].add(tacticUsed);
     newData[`${player}Hand`].delete(tacticUsed);
 
@@ -95,7 +95,7 @@ export const handleTraitor = (player, tacticUsed, cardTraitorData, destinationPi
 
     newData[pin][playerTraitored]["cardsPlayed"] = cardsPlayed.filter((playedCard) => playedCard !== card);
     newData[destinationPin][player]["cardsPlayed"].push(card);
-    newData["tacticsPlayed"][player].add(tacticUsed);
+    newData["tacticsPlayed"][player].add(TACTICS[tacticUsed].name);
     newData["used"].add(tacticUsed);
     newData[`${player}Hand`].delete(tacticUsed);
 
@@ -128,6 +128,7 @@ export const handleReturnCardToTopOfDeck = (player, card, data) => {
 export const handleRemoveScoutFromHand = (player, card, data) => {
     data[`${player}Hand`].delete(card);
     data['used'].add(card);
+    data["tacticsPlayed"][player].add("Scout");
 
     const otherPlayer = player === "player1" ? "player2" : "player1";
 
@@ -141,6 +142,11 @@ export const handleMud = (player, pin, card, data) => {
 
     data[`${player}Hand`].delete(card);
     data['used'].add(card);
+    newData["tacticsPlayed"][player].add("Mud");
+
+    const nextEventMessage = { description: `${player} played Mud on Flag ${pin[3]}.` };
+
+    newData["events"] = [...data["events"], nextEventMessage];
 
     return newData
 };
@@ -151,6 +157,11 @@ export const handleFog = (player, pin, card, data) => {
 
     data[`${player}Hand`].delete(card);
     data['used'].add(card);
+    newData["tacticsPlayed"][player].add("Fog");
+
+    const nextEventMessage = { description: `${player} played Fog on Flag ${pin[3]}.` };
+
+    newData["events"] = [...data["events"], nextEventMessage];
 
     return newData
 };

@@ -113,6 +113,164 @@ export const calculateScore = (player, pin, data) => {
     else if (tacticCount === 3) return FLUSH_VALUE + 21; // Change this when new Tactics are added
 };
 
+const mudOneTroopTwoTactics = (player, pin, remainingCards, otherScore, data) => {
+    const cardsPlayed = data[pin][player]["cardsPlayed"];
+    const tacticsArray = cardsPlayed.filter(card => card[0] === 't');
+
+    const troopArray = cardsPlayed.filter(card => card[0] !== 't');
+    const troop = troopArray[0];
+
+    const color = troop[0];
+    const number = parseInt(troop.slice(1));
+
+    const numberOfCards = 4;
+
+    const mudConsecArray = [number - 3, number - 2, number - 1, number + 1, number + 2, number + 3];
+
+    const possibleNumbersArray1 = TACTICS[tacticsArray[0]].possibleNumbers;
+    const possibleNumbersSet1 = new Set(possibleNumbersArray1);
+    const possibleColors1 = new Set(TACTICS[tacticsArray[0]].possibleColors);
+
+    const possibleNumbersArray2 = TACTICS[tacticsArray[1]].possibleNumbers;
+    const possibleNumbersSet2 = new Set(possibleNumbersArray2);
+    const possibleColors2 = new Set(TACTICS[tacticsArray[1]].possibleColors);
+
+    const flush = possibleColors1.has(color) && possibleColors2.has(color);
+
+    const numbersOfColorRemainingArray = flush && getRemainingOfOneColor(color, remainingCards);
+    const numbersOfColorRemainingSet = flush && new Set(numbersOfColorRemainingArray);
+
+    if (flush) {
+        const straightScore = consecutiveTwoTacticsWithBounds(numbersOfColorRemainingSet, possibleNumbersSet1, possibleNumbersSet2, numberOfCards, mudConsecArray);
+        if (straightScore > 0) return WEDGE_VALUE + Math.max(number, straightScore);
+    }
+
+    if (otherScore > WEDGE_VALUE) return 0;
+
+    const numbersRemainingObject = getRemainingNumbersObject(remainingCards);
+
+    if (possibleNumbersSet1.has(number) && possibleNumbersSet2.has(number) && numbersRemainingObject[number] >= 1) return TRIPS_VALUE + number;
+
+    if (otherScore > TRIPS_VALUE) return 0;
+
+    if (flush && numbersOfColorRemainingArray.length >= 1) return FLUSH_VALUE + addValuesAtEndOfArray(number + possibleNumbersArray1[0] + possibleNumbersArray2[0], numberOfCards - 3, numbersOfColorRemainingArray);
+
+    if (otherScore > FLUSH_VALUE) return 0;
+
+    const numbersRemainingSet = new Set(Object.keys(numbersRemainingObject).filter(key => numbersRemainingObject[key] >= 1));
+
+    const straightScore = consecutiveTwoTacticsWithBounds(numbersRemainingSet, possibleNumbersSet1, possibleNumbersSet2, numberOfCards, mudConsecArray);
+    if (straightScore > 0) return WEDGE_VALUE + Math.max(number, straightScore);
+
+    if (otherScore > STRAIGHT_VALUE) return 0;
+
+    return maxSum(number + possibleNumbersArray1[0] + possibleNumbersArray2[0], numberOfCards - 3, numbersRemainingObject);
+};
+
+const mudTwoTroopsOneTactic = (player, pin, remainingCards, otherScore, data) => {
+    const cardsPlayed = data[pin][player]["cardsPlayed"];
+    const troopsArray = cardsPlayed.filter(card => card[0] !== 't');
+    const troopColors = troopsArray.map(card => card[0]);
+    const troopNumbers = troopsArray.map(card => parseInt(card.slice(1))).sort((a, b) => a - b);
+    const troopSum = troopNumbers.reduce((sum, number) => sum + number, 0);
+
+    const tacticArray = cardsPlayed.filter(card => card[0] === 't');
+    const tactic = tacticArray[0];
+
+    const mudStraightArray = 
+        troopNumbers[0] + 1 === troopNumbers[1] ? [troopNumbers[0] - 2, troopNumbers[0] - 1, troopNumbers[1] + 1, troopNumbers[1] + 2] :
+        troopNumbers[0] + 2 === troopNumbers[1] ? [troopNumbers[0] - 1, troopNumbers[0] + 1, troopNumbers[1] + 1] :
+        troopNumbers[0] + 3 === troopNumbers[1] ? [troopNumbers[0] + 1, troopNumbers[1] - 1] :
+        null;
+
+    const possibleNumbersArray = TACTICS[tactic].possibleNumbers;
+    const possibleNumbersSet = new Set(possibleNumbersArray);
+    const possibleColors = new Set(TACTICS[tactic].possibleColors);
+
+    const numbersOfColorRemainingArray = getRemainingOfOneColor(troopColors[0], remainingCards);
+    const numbersOfColorRemainingSet = new Set(numbersOfColorRemainingArray);
+
+    const quads = troopNumbers.every(number => number === troopNumbers[0]) && possibleNumbersSet.has(troopNumbers[0]);
+    const flush = troopColors.every(color => color === troopColors[0]) && possibleColors.has(troopColors[0]);
+
+    if (flush && mudStraightArray) {
+        for (let i = mudStraightArray.length - 1; i >= 1; i--) {
+            if (twoSetsHaveBothValues(numbersOfColorRemainingSet, possibleNumbersSet, mudStraightArray[i - 1], mudStraightArray[i])) return WEDGE_VALUE + Math.max(mudStraightArray[i], troopNumbers[1]);
+        }
+    }
+
+    if (otherScore > WEDGE_VALUE) return 0;
+
+    const numbersRemainingObject = getRemainingNumbersObject(remainingCards);
+
+    if (quads && numbersRemainingObject[troopNumbers[0]] >= 1) return TRIPS_VALUE + troopNumbers[0];
+
+    if (otherScore > TRIPS_VALUE) return 0;
+
+    if (flush) return FLUSH_VALUE + addValuesAtEndOfArray(troopSum + possibleNumbersArray[0], 1, numbersOfColorRemainingArray);
+
+    if (otherScore > FLUSH_VALUE) return 0;
+
+    const numbersRemainingSet = new Set(Object.keys(numbersRemainingObject).filter(key => numbersRemainingObject[key] >= 1));
+
+    for (let i = mudStraightArray.length - 1; i >= 1; i--) {
+        if (twoSetsHaveBothValues(numbersRemainingSet, possibleNumbersSet, mudStraightArray[i - 1], mudStraightArray[i])) return WEDGE_VALUE + Math.max(mudStraightArray[i], troopNumbers[1]);
+    }
+
+    if (otherScore > STRAIGHT_VALUE) return 0;
+
+    return maxSum(troopSum + possibleNumbersArray[0], 1, numbersRemainingObject);
+};
+
+const mudThreeTroops = (player, pin, remainingCards, otherScore, data) => {
+    const cardsPlayed = data[pin][player]["cardsPlayed"];
+    const colors = cardsPlayed.map(card => card[0]);
+    const numbers = cardsPlayed.map(card => parseInt(card.slice(1))).sort((a, b) => a - b);
+    const numberSum = numbers.reduce((acc, curr) => acc + curr, 0);
+
+    const quads = numbers.every(num => num === numbers[0]);
+    const flush = colors.every(color => color === colors[0]);
+
+    const uniqueNumbers = new Set(numbers).size === numbers.length;
+    
+    const openStraight = uniqueNumbers && numbers[0] + 2 === numbers[2];
+    const gutStraightNumberMissing = uniqueNumbers && numbers[0] + 3 === numbers[2] && findMissingNumbersForStraight(1, numbers);
+
+    const colorArray = flush && getRemainingOfOneColor(colors[0], remainingCards);
+
+    if (colorArray) {
+        if (openStraight) {
+            if (remainingCards.has(`${colors[0]}${numbers[2] + 1}`)) return WEDGE_VALUE + numbers[2] + 1;
+            else if (remainingCards.has(`${colors[0]}${numbers[0] - 1}`)) return WEDGE_VALUE + numbers[2];
+        } else if (gutStraightNumberMissing) {
+            if (remainingCards.has(`${colors[0]}${gutStraightNumberMissing}`)) return WEDGE_VALUE + numbers[2];
+        }
+    }
+
+    if (otherScore > WEDGE_VALUE) return 0;
+    
+    const numbersRemainingObject = getRemainingNumbersObject(remainingCards);
+
+    if (quads && numbersRemainingObject[numbers[0]] >= 1) return TRIPS_VALUE + numbers[0];
+
+    if (otherScore > TRIPS_VALUE) return 0;
+
+    if (colorArray && colorArray.length >= 1) return FLUSH_VALUE + numberSum + colorArray[colorArray.length - 1];
+
+    if (otherScore > FLUSH_VALUE) return 0;
+
+    if (openStraight) {
+        if (numbersRemainingObject[numbers[2] + 1] >= 1) return STRAIGHT_VALUE + numbers[2] + 1;
+        else if (numbersRemainingObject[numbers[0] - 1] >= 1) return STRAIGHT_VALUE + numbers[2];
+    } else if (gutStraightNumberMissing) {
+        if (numbersRemainingObject[gutStraightNumberMissing] >= 1) return STRAIGHT_VALUE + numbers[2];
+    }
+    
+    if (otherScore > STRAIGHT_VALUE) return 0;
+
+    return maxSum(numberSum, 1, numbersRemainingObject);
+};
+
 const maxMudScore = (player, pin, remainingCards, otherScore, data) => {
     const fog = data[pin]["tacticsPlayed"].includes("Fog");
     if (fog) return maxFogScore(player, pin, otherScore, data);
@@ -139,9 +297,9 @@ const maxMudScore = (player, pin, remainingCards, otherScore, data) => {
             return 0;
         }
     } else if (cardsPlayed.length === 3) {
-        if (tacticCount === 0) return 0;
-        else if (tacticCount === 1) return 0;
-        else if (tacticCount === 2) return 0;
+        if (tacticCount === 0) return mudThreeTroops(player, pin, remainingCards, otherScore, data);
+        else if (tacticCount === 1) return mudTwoTroopsOneTactic(player, pin, remainingCards, otherScore, data);
+        else if (tacticCount === 2) return mudOneTroopTwoTactics(player, pin, remainingCards, otherScore, data);
         else if (tacticCount === 3) return FLUSH_VALUE + maxSum(21, 1, getRemainingNumbersObject(remainingCards));
         else {
             console.error("Error in maxMudScore. Length 3.");
@@ -269,8 +427,12 @@ const getRemainingNumbersObject = (remainingCards) => {
     };
     remainingCards.forEach(card => {
         const number = parseInt(card.slice(1));
-        if (numbersRemaining[number]) numbersRemaining[number]++;
-        else (console.error("Error in getRemainingNumbersObject"));
+        if (numbersRemaining[number] !== undefined) numbersRemaining[number]++;
+        else {
+            console.error("Error in getRemainingNumbersObject");
+            console.log(number);
+            console.log(remainingCards);
+        };
     });
 
     return numbersRemaining;
@@ -340,9 +502,6 @@ const noCardsPlayed = (numberOfCards, remainingCards, otherScore) => {
     return maxSum(0, numberOfCards, numbersRemainingObject);
 };
 
-// Mud
-// Fog
-
 const canWedge1 = (color, number, numberOfCards, remainingCards) => {
     const offsetArrays = {
         3: [-2, -1, 1, 2],
@@ -360,7 +519,7 @@ const canWedge1 = (color, number, numberOfCards, remainingCards) => {
         } else sequence = 0;
         
     }
-    return WEDGE_VALUE;
+    return 0;
 };
 
 const canFlush = (currentSum, cardsNeeded, arr) => {
@@ -411,13 +570,13 @@ const oneTroopPlayed = (player, pin, remainingCards, otherScore, data) => {
     let score;
 
     score = canWedge1(color, number, numberOfCards, remainingCards);
-    // We return WEDGE_VALUE without any increment if there is not a potential WEDGE;
+
     if (score > WEDGE_VALUE) return score;
     if (otherScore > WEDGE_VALUE) return 0;
 
     const numbersRemainingObject = getRemainingNumbersObject(remainingCards);
     
-    score = canTrips(new Set(number), numberOfCards - 1, numbersRemainingObject);
+    score = canTrips(new Set([number]), numberOfCards - 1, numbersRemainingObject);
 
     if (score > TRIPS_VALUE) return score;
     if (otherScore > TRIPS_VALUE) return 0;
@@ -806,9 +965,9 @@ const consecutiveOneTacticNoTroops = (troopSet, tacticSet, numberOfCards) => {
         let tacticUsed = false;
         for (let offset = 0; offset <= numberOfCards - 1; offset++) {
             const smallerNumber = currentNumber - offset;
-            if (!troopSet.has(smallerNumber) && !tacticSet.has(smallerNumber)) continue;
+            if (!troopSet.has(smallerNumber) && !tacticSet.has(smallerNumber)) break;
             else if (!troopSet.has(smallerNumber)) {
-                if (tacticNeeded) continue;
+                if (tacticNeeded) break;
                 else {
                     tacticNeeded = true;
                     tacticUsed = true;
@@ -828,9 +987,9 @@ const consecutiveOneTacticWithBounds = (troopSet, tacticSet, numberOfCards, cons
         let tacticUsed = false;
         for (let offset = 0; offset <= numberOfCards - 2; offset++) {
             const smallerNumber = currentNumber - offset;
-            if (!troopSet.has(smallerNumber) && !tacticSet.has(smallerNumber)) continue;
+            if (!troopSet.has(smallerNumber) && !tacticSet.has(smallerNumber)) break;
             else if (!troopSet.has(smallerNumber)) {
-                if (tacticNeeded) continue;
+                if (tacticNeeded) break;
                 else {
                     tacticNeeded = true;
                     tacticUsed = true;
@@ -851,16 +1010,51 @@ const consecutiveTwoTacticsNoTroops = (troopSet, tacticSet1, tacticSet2, numberO
         let tactic2Used = false;
         for (let offset = 0; offset <= numberOfCards - 1; offset++) {
             const smallerNumber = currentNumber - offset;
-            if (!troopSet.has(smallerNumber) && !tacticSet1.has(smallerNumber) && !tacticSet2.has(smallerNumber)) continue;
+            if (!troopSet.has(smallerNumber) && !tacticSet1.has(smallerNumber) && !tacticSet2.has(smallerNumber)) break;
             else if (!troopSet.has(smallerNumber))
                 if (!tacticSet1.has(smallerNumber)) {
-                    if (tactic2Needed) continue;
+                    if (tactic2Needed) break;
                     else {
                         tactic2Needed = true;
                         tactic2Used = true;
                     }
                 } else if (!tacticSet2.has(smallerNumber)) {
-                    if (tactic1Needed) continue;
+                    if (tactic1Needed) break;
+                    else {
+                        tactic1Needed = true;
+                        tactic1Used = true;
+                };
+            } 
+            
+            if (tacticSet1.has(smallerNumber)) tactic1Used = true;
+            if (tacticSet2.has(smallerNumber)) tactic2Used = true;
+
+            if (offset === numberOfCards - 1 && tactic1Used && tactic2Used) return currentNumber;
+        }
+    }
+    return 0;
+};
+
+const consecutiveTwoTacticsWithBounds = (troopSet, tacticSet1, tacticSet2, numberOfCards, consecArray) => {
+    for (let i = consecArray.length - 1; i >= numberOfCards - 2; i--) {
+        const currentNumber = consecArray[i];
+        if (!troopSet.has(currentNumber) && !tacticSet1.has(currentNumber) && !tacticSet2.has(currentNumber)) continue;
+        let tactic1Needed = false;
+        let tactic1Used = false;
+        let tactic2Needed = false;
+        let tactic2Used = false;
+        for (let offset = 0; offset <= numberOfCards - 1; offset++) {
+            const smallerNumber = currentNumber - offset;
+            if (!troopSet.has(smallerNumber) && !tacticSet1.has(smallerNumber) && !tacticSet2.has(smallerNumber)) break;
+            else if (!troopSet.has(smallerNumber))
+                if (!tacticSet1.has(smallerNumber)) {
+                    if (tactic2Needed) break;
+                    else {
+                        tactic2Needed = true;
+                        tactic2Used = true;
+                    }
+                } else if (!tacticSet2.has(smallerNumber)) {
+                    if (tactic1Needed) break;
                     else {
                         tactic1Needed = true;
                         tactic1Used = true;

@@ -53,11 +53,11 @@ function App() {
     console.log(gameData);
   }, [gameData]);
 
-  useEffect(() => {
-    console.log(cardToPlay);
-    console.log(cardToTactic);
-    // eslint-disable-next-line
-  }, [cardToPlay, cardToTactic]);
+  // useEffect(() => {
+  //   console.log(cardToPlay);
+  //   console.log(cardToTactic);
+  //   // eslint-disable-next-line
+  // }, [cardToPlay, cardToTactic]);
 
   return (
     <div className="App">

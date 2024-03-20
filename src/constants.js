@@ -18,7 +18,7 @@ export const CARD_COLORS = {
     'v': '#8da6fe',
     '': '#eee',
     't': '#aa923e',
-    "T": '#dfc076'
+    'T': '#dfc076'
 };
 
 export const COLOR_REFERENCE = {

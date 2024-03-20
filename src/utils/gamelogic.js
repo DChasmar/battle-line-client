@@ -1,5 +1,6 @@
 import { COLORS_SET, COLOR_REFERENCE, TACTICS } from '../constants'
 import { calculateScore, calculateMaxScore } from './scores'
+import { disguiseOpponentHand } from './gamedata'
 
 const checkFirstToCompletePinHand = (player, pin, data) => {
     const numberOfCards = data[pin]["tacticsPlayed"].includes("Mud") ? 4 : 3;
@@ -16,6 +17,7 @@ export const playCard = (player, pin, card, data) => {
     
     newData[pin][player]["cardsPlayed"].push(card);
     newData["used"].add(card);
+    if (card[0] === 't') newData["tacticsPlayed"][player].add(TACTICS[card].name);
     newData[`${player}Hand`].delete(card);
     
     if (newData[pin][player]["cardsPlayed"].length === numberOfCards) {
@@ -86,7 +88,6 @@ export const selectTacticCard = (player, scout, data) => {
 };
 
 const findClaimableAndPlayable = (player, data) => {
-    // Can I reduce this object to a single set?
     const newPinsPlayable = new Set();
 
     for (let i = 1; i <= 9; i++) {
@@ -104,22 +105,22 @@ const findClaimableAndPlayable = (player, data) => {
             const scorePlayer1 = calculateScore("player1", pin, data);
             const scorePlayer2 = calculateScore("player2", pin, data);
 
-            data[pin]["player1"]["claimable"] = scorePlayer1 > scorePlayer2;
-            data[pin]["player2"]["claimable"] = scorePlayer1 < scorePlayer2;
-            if (!data[pin]["player1"]["claimable"] && !data[pin]["player2"]["claimable"]) {
+            data[pin]["player1"]["claimable"] = player === "player1" && scorePlayer1 > scorePlayer2;
+            data[pin]["player2"]["claimable"] = player === "player2" && scorePlayer1 < scorePlayer2;
+            if (scorePlayer1 === scorePlayer2) {
                 console.log("The hands are the same.")
-                data[pin]["player1"]["claimable"] = data[pin]["firstToCompleteHand"] === "player1"
-                data[pin]["player2"]["claimable"] = data[pin]["firstToCompleteHand"] === "player2"
+                data[pin]["player1"]["claimable"] = player === "player1" && data[pin]["firstToCompleteHand"] === "player1";
+                data[pin]["player2"]["claimable"] = player === "player2" && data[pin]["firstToCompleteHand"] === "player2";
             }
         } else if (p1HandComplete) {
             const player1Score = calculateScore("player1", pin, data);
-            data[pin]["player1"]["claimable"] = player1Score >= calculateMaxScore("player2", pin, player1Score, data);
+            data[pin]["player1"]["claimable"] = player === "player1" && player1Score >= calculateMaxScore("player2", pin, player1Score, data);
         } else if (p2HandComplete) {
             const player2Score = calculateScore("player2", pin, data);
-            data[pin]["player2"]["claimable"] = player2Score >= calculateMaxScore("player1", pin, player2Score, data);
+            data[pin]["player2"]["claimable"] = player === "player2" && player2Score >= calculateMaxScore("player1", pin, player2Score, data);
         }
     }
-    return data
+    return data;
 };
 
 export const updateNextAction = (data) => {
@@ -132,12 +133,17 @@ export const updateNextAction = (data) => {
         return data;
     }
 
+    const latestAction = actionCycle[currentIndex];
+
     const newIndex = (currentIndex + 1) % actionCycle.length;
     const newNextAction = actionCycle[newIndex];
     
     const newData = { ...data };
+    if (latestAction === "player2Draw") newData["player2HandConcealed"] = disguiseOpponentHand(data.player2Hand);
+
     newData["nextAction"] = newNextAction;
     if (newNextAction === "player1Draw" || newNextAction === "player2Draw") return newData;
+
     const player = newNextAction.slice(0, 7);
     return findClaimableAndPlayable(player, newData);
     // Manage the scenario where there are no places to play.
