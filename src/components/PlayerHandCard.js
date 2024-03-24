@@ -28,7 +28,7 @@ function PlayerHandCard({ cardValue }) {
     const handleClick = () => {
       if (gameData["nextAction"] !== 'player1Play' || (scouting && cardToTactic.stage < 3)) return;
       if (tactic && !canPlayTactic) {
-        alert("You have played more Tactic cards than your opponent.")
+        alert("You have played more Tactic cards than your opponent. You must wait until your opponent plays a Tactic card to play another.")
         return;
       } else if (tactic && playedDariusOrAlexander && dariusAndAlexander.has(TACTICS[cardValue].name)) {
         alert("You cannot play both Darius and Alexander.")

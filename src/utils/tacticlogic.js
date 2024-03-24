@@ -43,7 +43,7 @@ export const handleDiscard = (player, tacticUsed, cardDiscardedData, data) => {
 export const handleRedeploy = (player, tacticUsed, cardRedeployData, destinationPin, data) => {
     const newData = { ...data };
 
-    if (!cardRedeployData.card || !cardRedeployData.pin || !cardRedeployData.tactic) {
+    if (!cardRedeployData.card || !cardRedeployData.pin) {
         console.log(cardRedeployData);
         console.log("Error in handleRedeploy");
         return;

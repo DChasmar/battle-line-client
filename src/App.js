@@ -12,7 +12,7 @@ export const AppContext = createContext();
 function App() {
   const [gameData, setGameData] = useState({});
   const [cardToPlay, setCardToPlay] = useState("");
-  // A State variable to handle tactic operations, such as redeploy and traitor
+  // A State variable to handle tactic operations, such as Redeploy and Traitor
   const [cardToTactic, setCardToTactic] = useState(null);
 
   const [showPrompt, setShowPrompt] = useState(true);

@@ -412,7 +412,7 @@ const getRemainingOfOneColor = (color, remainingCards) => {
     return numbersOfColorRemaining;
 };
 
-const getRemainingNumbersObject = (remainingCards) => {
+export const getRemainingNumbersObject = (remainingCards) => {
     const numbersRemaining = {
         1: 0,
         2: 0,
@@ -856,7 +856,7 @@ const twoTacticsPlayed = (player, pin, remainingCards, otherScore, data) => {
     return maxSum(possibleNumbersArray1[0] + possibleNumbersArray2[0], numberOfCards - 2, numbersRemainingObject);
 };
 
-const findMissingNumbersForStraight = (numbersMissing, arr) => {
+export const findMissingNumbersForStraight = (numbersMissing, arr) => {
     if (numbersMissing === 1) {
         for (let i = 0; i < arr.length; i++) {
             if (arr[i] + 1 !== arr[i + 1]) return arr[i] + 1; // returns an integer

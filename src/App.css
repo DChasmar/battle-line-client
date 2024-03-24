@@ -34,12 +34,13 @@ body {
 
 .event-log {
   width: 300px;
-  height: 200px;
+  height: 100px;
   align-items: center;
   justify-content: center;
-  background-color: #f0be82;
+  background-color: #000;
   text-align: left;
   overflow: auto;
+  position: relative;
   /* scroll-behavior: smooth;
   scroll-snap-type: ; */
 }

@@ -79,7 +79,10 @@ export const initializeGameData = () => {
         "pin8": false,
         "pin9": false
     }
-    data["nextAction"] = "player1Play"
+
+    const randomValue = Math.random();
+
+    data["nextAction"] = randomValue < 0.5 ? "player1Play" : "player2Play";
 
     const pinSet = new Set();
 

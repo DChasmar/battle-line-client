@@ -58,7 +58,8 @@ export const selectTroopCard = (player, scout, data) => {
     const troopCardsList = Array.from(data["troopCards"]);
     const drawnCard = troopCardsList[Math.floor(Math.random() * troopCardsList.length)];
 
-    const nextEventMessage = { description: `${player} selected a Troop Card.` };
+    const nextEventMessage = !scout ? { description: `${player} selected a Troop Card.` } :
+    { description: `${player} used Scout to select a Troop Card.` };
 
     const newData = {
         ...data,
@@ -76,7 +77,8 @@ export const selectTacticCard = (player, scout, data) => {
     const tacticCardsList = Array.from(data["tacticCards"]);
     const drawnCard = tacticCardsList[Math.floor(Math.random() * tacticCardsList.length)];
 
-    const nextEventMessage = { description: `${player} selected a Tactic Card.` };
+    const nextEventMessage = !scout ? { description: `${player} selected a Tactic Card.` } :
+    { description: `${player} used Scout to select a Tactic Card.` };
 
     const newData = {
         ...data,
@@ -120,6 +122,8 @@ const findClaimableAndPlayable = (player, data) => {
             data[pin]["player2"]["claimable"] = player === "player2" && player2Score >= calculateMaxScore("player1", pin, player2Score, data);
         }
     }
+
+    // Add a condition for when newPinsPlayable is empty and when cannot play a Tactic card.
     return data;
 };
 
@@ -146,7 +150,19 @@ export const updateNextAction = (data) => {
 
     const player = newNextAction.slice(0, 7);
     return findClaimableAndPlayable(player, newData);
-    // Manage the scenario where there are no places to play.
+};
+
+// This function is for the instances when the normal cycle of playing and drawing a card is broken,
+// such as when a player cannot play, or after a player plays Scout.
+export const updateNextAction2 = (newNextAction, data) => {
+    if (data.nextAction === "gameOver") return;
+    
+    const newData = { ...data };
+
+    newData["nextAction"] = newNextAction;
+
+    const player = newNextAction.slice(0, 7);
+    return findClaimableAndPlayable(player, newData);  
 };
 
 const hasConsecutivePins = (pins) => {

@@ -2,7 +2,7 @@ import React, { useContext } from 'react'
 import { AppContext } from "../App";
 import PlayerPinCard from './PlayerPinCard';
 import OpponentPinCard from './OpponentPinCard';
-import { TACTICS } from '../constants';
+import { TACTICS, CARD_COLORS } from '../constants';
 import { checkGameOver, updateNextAction } from '../utils/gamelogic';
 import { handleFog, handleMud } from '../utils/tacticlogic';
 
@@ -57,8 +57,6 @@ function Pin({ pinData, pin }) {
             const winner = checkGameOver(newGameData);
             if (winner) {
                 newGameData["gameOver"] = winner;
-                const nextEventMessage = { description: `player2 claimed Pin ${pin[3]}.` };
-                newGameData["events"].push(nextEventMessage);
             }
             setGameData(newGameData);
         } else alert("Not claimable.")
@@ -85,7 +83,7 @@ function Pin({ pinData, pin }) {
             className="circle"
             style = {{
                 translateY: claimed === "player1" ? '20px' : claimed === "player2" ? '-20px' : 'inherit',
-                backgroundColor: mudded ? 'brown' : fogged ? 'grey' : 'red'
+                backgroundColor: mudded ? CARD_COLORS["mud"] : fogged ? CARD_COLORS["fog"] : 'red'
             }}>{pinNumber}</div>
             <div className='cards-played'>
                 {renderCards(player1CardsPlayed, 'player1')}

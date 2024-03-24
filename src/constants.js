@@ -18,7 +18,9 @@ export const CARD_COLORS = {
     'v': '#8da6fe',
     '': '#eee',
     't': '#aa923e',
-    'T': '#dfc076'
+    'T': '#dfc076',
+    'mud': '#72400b',
+    'fog': '#a7beb9'
 };
 
 export const COLOR_REFERENCE = {
@@ -28,6 +30,29 @@ export const COLOR_REFERENCE = {
     'g': 'Green',
     'b': 'Blue',
     'v': 'Purple',
+}
+
+export const WORD_COLORS = {
+    'Red': CARD_COLORS.r,
+    'Orange': CARD_COLORS.o,
+    'Yellow': CARD_COLORS.y,
+    'Green': CARD_COLORS.g,
+    'Blue': CARD_COLORS.b,
+    'Purple': CARD_COLORS.v,
+    'Troop': CARD_COLORS.T,
+    'Tactic': CARD_COLORS.t,
+    'Mud': CARD_COLORS.mud,
+    'Fog': CARD_COLORS.fog,
+    'Campaign': CARD_COLORS.t,
+    'Cavalry': CARD_COLORS.t,
+    'Shield': CARD_COLORS.t,
+    'Bearer': CARD_COLORS.t,
+    'Alexander': CARD_COLORS.t,
+    'Darius': CARD_COLORS.t,
+    'Redeploy': CARD_COLORS.t,
+    'Scout': CARD_COLORS.t,
+    'Traitor': CARD_COLORS.t,
+    'Deserter': CARD_COLORS.t,
 }
 
 export const TACTICS = {
