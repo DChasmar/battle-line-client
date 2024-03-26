@@ -2,6 +2,7 @@ import React, { useContext } from 'react';
 import { AppContext } from "../App";
 import { CARD_COLORS, COLORS_SET, TACTICS } from '../constants'
 import { handleReturnCardToTopOfDeck, handleRemoveScoutFromHand } from '../utils/tacticlogic'
+import { updateNextAction2 } from '../utils/gamelogic';
 
 function PlayerHandCard({ cardValue }) {
     const { gameData, setGameData, cardToPlay, setCardToPlay, cardToTactic, setCardToTactic } = useContext(AppContext);
@@ -39,7 +40,7 @@ function PlayerHandCard({ cardValue }) {
     };
 
     const handleScoutClick = () => {
-      if (tactic && TACTICS[cardToPlay].name === "Scout") return;
+      if (TACTICS[cardToPlay].name === "Scout" && tactic && TACTICS[cardValue].name === "Scout") return;
       const newCardToTactic = {
         ...cardToTactic,
         "stage": (cardToTactic["stage"] || 0) + 1
@@ -53,7 +54,7 @@ function PlayerHandCard({ cardValue }) {
         setCardToPlay("");
         setCardToTactic(null);
       };
-      setGameData(newData);
+      setGameData(updateNextAction2("player2Play", newData));
     }
 
     if (cardValue in TACTICS) {

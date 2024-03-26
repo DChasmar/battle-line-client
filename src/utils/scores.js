@@ -549,16 +549,16 @@ const canStraight1 = (number, numberOfCards, numbersRemainingObject) => {
 };
 
 const maxSum = (currentSum, numbersToAdd, numbersRemainingObject) => {
-    let max_sum = currentSum;
+    let bestSum = currentSum;
     for (const number of NUMBERS_ARRAY) {
         const occurrences = Math.min(numbersRemainingObject[number], numbersToAdd);
-        currentSum += occurrences * number;
+        bestSum += occurrences * number;
         numbersRemainingObject[number] -= occurrences;
         numbersToAdd -= occurrences;
 
         if (numbersToAdd <= 0) break;
     }
-    return max_sum;
+    return bestSum;
 };
 
 const oneTroopPlayed = (player, pin, remainingCards, otherScore, data) => {

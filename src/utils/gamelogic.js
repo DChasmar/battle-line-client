@@ -1,4 +1,4 @@
-import { COLORS_SET, COLOR_REFERENCE, TACTICS } from '../constants'
+import { COLORS_SET, COLOR_REFERENCE, TACTICS, TACTIC_TYPES } from '../constants'
 import { calculateScore, calculateMaxScore } from './scores'
 import { disguiseOpponentHand } from './gamedata'
 
@@ -123,8 +123,26 @@ const findClaimableAndPlayable = (player, data) => {
         }
     }
 
+    data[`${player}PinsPlayable`] = newPinsPlayable;
+
     // Add a condition for when newPinsPlayable is empty and when cannot play a Tactic card.
     return data;
+};
+
+export const checkIfPossibleToPlay = (player, data) => {
+    const playablePinsKey = player + "PinsPlayable";
+    const otherPlayer = player === "player1" ? "player2" : "player1";
+    const playedMoreTacticsThanOpponent = data.tacticsPlayed[player].size > data.tacticsPlayed[otherPlayer].size;
+    const playerHand = data[`${player}Hand`];
+    let nonPlayCardTacticPlayable = false;
+    for (const card of playerHand) {
+        if (card[0] === 't' && TACTIC_TYPES.playAnytime.has(TACTICS[card].name)) {
+            nonPlayCardTacticPlayable = true;
+            break;
+        }
+    }
+    if (data[playablePinsKey].size < 1 && (playedMoreTacticsThanOpponent || !nonPlayCardTacticPlayable)) return false;
+    else return true;
 };
 
 export const updateNextAction = (data) => {
@@ -142,7 +160,7 @@ export const updateNextAction = (data) => {
     const newIndex = (currentIndex + 1) % actionCycle.length;
     const newNextAction = actionCycle[newIndex];
     
-    const newData = { ...data };
+    let newData = { ...data };
     if (latestAction === "player2Draw") newData["player2HandConcealed"] = disguiseOpponentHand(data.player2Hand);
 
     newData["nextAction"] = newNextAction;

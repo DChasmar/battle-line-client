@@ -21,7 +21,7 @@ export const handleDiscard = (player, tacticUsed, cardDiscardedData, data) => {
     if (!cardsPlayed) {
         console.log("Card not found in cardsPlayed array");
         return;
-    }
+    };
 
     // Remove the card from the cardsPlayed array using filter
     newData[pin][playerDiscarded]["cardsPlayed"] = cardsPlayed.filter((playedCard) => playedCard !== card);
@@ -34,6 +34,40 @@ export const handleDiscard = (player, tacticUsed, cardDiscardedData, data) => {
     const cardName = COLORS_SET.has(card[0]) ? `${parseInt(card.slice(1))} ${color}` : color;
 
     const nextEventMessage = { description: `${player} used Tactic ${TACTICS[tacticUsed].name} to discard ${cardName} from Flag ${pin[3]}.` }
+
+    newData["events"].push(nextEventMessage);
+
+    return newData;
+};
+
+const findKeyByTacticName = (tacticsObject, tacticName) => {
+    for (const key in tacticsObject) {
+        if (tacticsObject[key].name === tacticName) {
+            return key;
+        }
+    }
+    // Return null if tacticName is not found
+    return null;
+};
+
+export const handleRemoveChangePinTactic = (player, pin, tacticUsed, tacticNameToRemove, data) => {
+    const newData = { ...data };
+
+    if (!player || !pin || !tacticUsed || !tacticNameToRemove) {
+        console.log(player, pin, tacticUsed);
+        console.log("Error in handleRemoveChangePinTactic");
+        return;
+    };
+
+    // Remove the card from the cardsPlayed array using filter
+    newData[pin]["tacticsPlayed"] = newData[pin]["tacticsPlayed"].filter(tactic => TACTICS[tactic].name !== tacticNameToRemove);
+    const tacticCard = findKeyByTacticName(TACTICS, tacticNameToRemove);
+    newData["discardedCards"].push(tacticCard);
+    newData["tacticsPlayed"][player].add(TACTICS[tacticUsed].name);
+    newData["used"].add(tacticUsed); // Should I not add tactics to used?
+    newData[`${player}Hand`].delete(tacticUsed);
+
+    const nextEventMessage = { description: `${player} used Tactic ${TACTICS[tacticUsed].name} to discard ${tacticNameToRemove} from Flag ${pin[3]}.` }
 
     newData["events"].push(nextEventMessage);
 
@@ -130,9 +164,6 @@ export const handleRemoveScoutFromHand = (player, card, data) => {
     data['used'].add(card);
     data["tacticsPlayed"][player].add("Scout");
 
-    const otherPlayer = player === "player1" ? "player2" : "player1";
-
-    data["nextAction"] = `${otherPlayer}Play`
     return data;
 };
 

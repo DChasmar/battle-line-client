@@ -318,7 +318,8 @@ const tryTactic = (data, remainingCards) => {
                     }
                 }
                 if (cardsToReturnToDeck.length >= 2) {
-                    return updateNextAction(handleComputerScouting(cardsToReturnToDeck.slice(-2), tactic, data));
+                    // Do not use updateNextAction because handleComputerScouting updates nextAction
+                    return updateNextAction2("player1Play", handleComputerScouting(cardsToReturnToDeck.slice(-2), tactic, data));
                 }
             }
         } else if (tacticName === "Redeploy") {
@@ -522,7 +523,7 @@ const wantedCards2 = (cards, numbersRemainingObject) => {
     } else if (trips && numbersRemainingObject[numbers[0]] <= 1) {
         for (const color of COLORS_SET) {
             const card = color + numbers[0];
-            wanted.add(card);
+            if (!cards.includes(card)) wanted.add(card);
         }
     }
     return wanted;
@@ -724,14 +725,16 @@ export const handlePlayer2DrawCard = (data) => {
     for (const card of data.player2Hand) {
         if (card[0] === 't') tacticsInHand++;
     }
+    let tacticsInOpponentHand = 0
+    for (const card of data.player1Hand) {
+        if (card[0] === 't') tacticsInOpponentHand++;
+    }
     const cardsUsed = data.used.size;
     const tacticPlayable = data.tacticsPlayed.player2.size <= data.tacticsPlayed.player1.size;
-    if ((cardsUsed % 15 === 0 || cardsUsed % 24 === 0) && tacticsInHand < 2 && tacticPlayable) return updateNextAction(selectTacticCard('player2', false, data));
+    if (tacticsInHand < 2 && ((tacticsInOpponentHand > tacticsInHand && tacticPlayable) || (cardsUsed > 30 && data.tacticsPlayed.player2.size === 0))) return updateNextAction(selectTacticCard('player2', false, data));
     else if (data.troopCards.size > 0) return updateNextAction(selectTroopCard('player2', false, data));
     else if (data.tacticCards.size > 0) return updateNextAction(selectTacticCard('player2', false, data));
 };
-
-// I need to manage the computer's decision to select and play tactic cards.
 
 // Select a Tactic card:
 // Is my best remaining potential score is below a critical value?
@@ -739,22 +742,18 @@ export const handlePlayer2DrawCard = (data) => {
 
 // Deserter: For each opponent card: Is it critical to the hand? 
 // Traitor: For each opponent card: Is it critical to the hand? Could I use it?
-
 // Scout: It is later in the game, and I have two worthless cards.
 // Redeploy: It is later in the game, and...
     // I can free up a flag for a set I have in my hand.
     // Another flag needs my card.
-
 // Darius & Alexander: Is the card that is needed no longer available?
 // Campaign Cavalry: Is the card that is needed no longer available? Can a formation with 8 work?
 // Shield Bearer: Is a low wedge plausible?
-
 // Mud: Is the opponent about to win a hand, that I could win, if I were to play Mud?
 // Fog: The opponent has a low sum wedge that I cannot beat.
 
-
-// Types of Bots:
-// The best we have
-// Mr. Do Not Play Tactics
-// Mr. Wedge or Flush or bust
-// Mr. Trips or bust
+// Notes on making a Better Bot:
+// When the computer has played fog, it should try to get the highest total on that flag
+// If there is a flag the opponent has 3 cards on, and I have two cards played, is there a card I can play to win the hand immediately?
+// Maybe if it is time to play a random card, I can play a card the opponent wants.
+// Can I track the last card the opponent played for the sake of the computer?

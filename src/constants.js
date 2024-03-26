@@ -20,7 +20,8 @@ export const CARD_COLORS = {
     't': '#aa923e',
     'T': '#dfc076',
     'mud': '#72400b',
-    'fog': '#a7beb9'
+    'fog': '#a7beb9',
+    'claim': '#4caf50'
 };
 
 export const COLOR_REFERENCE = {
@@ -93,7 +94,7 @@ export const TACTICS_VARIANT = {
     't2': {name: "Blue", symbol: "Bl", type: "playCard"},
     't3': {name: "Yellow", symbol: "Ye", type: "playCard"},
     't4': {name: "Swap", symbol: "Sa", type: "youTroopMeTroop"},
-    't5': {name: "Steal", symbol: "St", type: "youTroopHand"},
+    't5': {name: "GoFish", symbol: "Go", type: "youTroopHand"},
     't6': {name: "Troop 5", symbol: "T5", type: "changePin"},
     't7': {name: "Aim Low", symbol: "AL", type: "changePin"},
     't8': {name: "Flip", symbol: "Fl", type: "changePin"},
@@ -102,16 +103,31 @@ export const TACTICS_VARIANT = {
 }
 
 export const TACTIC_TYPES = {
-    playCard: new Set(['Darius', 'Alexander', 'Campaign Cavalry', 'Shield Bearer', 'Red', 'Blue', 'Yellow']),
-    changePin: new Set(['Mud', 'Fog', 'Troop 5', 'Aim Low', 'Flip']),
-    youTroop: new Set(['Traitor']),
-    youAny: new Set(['Deserter']),
-    meAny: new Set(['Redeploy']),
-    newCards: new Set(['Scout', 'New Troops']),
-    youTroopMeTroop: new Set(['Swap']),
-    meTwoAny: new Set(['Switch']),
-    youTroopHand: new Set(['Steal']),
+    playCard: new Set(['Darius', 'Alexander', 'Campaign Cavalry', 'Shield Bearer', 'Red', 'Blue']),
+    playAnytime: new Set(['Deserter', 'Scout', 'Mud', 'Fog', 'Redeploy'])
 }
+
+// export const TURN_MESSAGES = {
+//     'player1Play': "Play a card.",
+//     'player1Draw': "Draw a card.",
+//     'player2Play': "It is the opponent's turn to play a card.",
+//     'player2Draw': "It is the opponent's turn to draw a card."
+// }
+
+// {scout ? (<div>{SCOUT_MESSAGES[cardToTactic !== null ? cardToTactic.stage : 0]}</div>) : (<div>{TURN_MESSAGES[gameData.nextAction]}</div>)}
+
+// export const TACTIC_TYPES = {
+//     playCard: new Set(['Darius', 'Alexander', 'Campaign Cavalry', 'Shield Bearer', 'Red', 'Blue', 'Yellow']),
+//     changePin: new Set(['Mud', 'Fog', 'Troop 5', 'Aim Low', 'Flip']),
+//     youTroop: new Set(['Traitor']),
+//     youAny: new Set(['Deserter']),
+//     meAny: new Set(['Redeploy']),
+//     newCards: new Set(['Scout', 'New Troops']),
+//     youTroopMeTroop: new Set(['Swap']),
+//     meTwoAny: new Set(['Switch']),
+//     youTroopHand: new Set(['GoFish']),
+//     playAnytime: new Set([])
+// }
 
 export const SCOUT_MESSAGES = [
     "To use scout, draw three cards from either deck.",

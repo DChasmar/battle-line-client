@@ -6,7 +6,7 @@ import OpponentHand from './OpponentHand';
 import GameOver from './GameOver';
 import { AppContext } from "../App";
 import { TACTICS, SCOUT_MESSAGES } from '../constants'
-import { updateNextAction } from '../utils/gamelogic'
+import { checkIfPossibleToPlay, updateNextAction, updateNextAction2 } from '../utils/gamelogic'
 import { handleDiscard } from '../utils/tacticlogic'
 
 function Board() {
@@ -24,8 +24,9 @@ function Board() {
     const discard = cardToPlay && cardToPlay in TACTICS && tacticsMayDiscard.has(TACTICS[cardToPlay].name) && cardToTactic !== null;
 
     const scout = cardToPlay && cardToPlay in TACTICS && TACTICS[cardToPlay].name === "Scout";
-    // Show Mud and Fog once they have been applied.
-    // Show four cards instead of three if mud has been applied.
+
+    const unableToPlay = gameData.player1PinsPlayable.size < 1;
+
     // You cannot Desert mud if either player has played a fourth card.
     // You can play mud and fog on the same pin.
 
@@ -34,6 +35,16 @@ function Board() {
         setGameData(newData);
         setCardToPlay("");
         setCardToTactic({});
+    };
+
+    const handleUnableToPlayClick = () => {
+        const canPlayTactic = checkIfPossibleToPlay("player1", gameData);
+        if (canPlayTactic) {
+            alert("You are able to play a Tactic card.")
+        } else {
+            const newData = updateNextAction2("player2Play", gameData);
+            setGameData(newData);
+        }
     };
 
     return (
@@ -53,11 +64,18 @@ function Board() {
                 {discard && (
                 <button
                 className='claim-button'
-                style={{ height: "50px", margin: "12px" }}
+                style={{ height: "50px", margin: "12px", backgroundColor: 'black' }}
                 onClick={handleDiscardClick}>
                     Discard
                 </button>
                 )}
+                {unableToPlay && (
+                <button
+                className='claim-button'
+                style={{ height: "50px", margin: "12px", backgroundColor: 'black' }}
+                onClick={handleUnableToPlayClick}>
+                    Unable to Play?
+                </button>)}
             </div>
             {gameData.gameOver && <GameOver />}
         </div>

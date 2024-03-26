@@ -4,7 +4,7 @@ import PlayerPinCard from './PlayerPinCard';
 import OpponentPinCard from './OpponentPinCard';
 import { TACTICS, CARD_COLORS } from '../constants';
 import { checkGameOver, updateNextAction } from '../utils/gamelogic';
-import { handleFog, handleMud } from '../utils/tacticlogic';
+import { handleFog, handleMud, handleRemoveChangePinTactic } from '../utils/tacticlogic';
 
 function Pin({ pinData, pin }) {
     const { gameData, setGameData, cardToPlay, setCardToPlay } = useContext(AppContext);
@@ -20,6 +20,8 @@ function Pin({ pinData, pin }) {
     const numberOfCards = mudded ? 4 : 3;
 
     const readyToAlterPin = !claimed && cardToPlay && cardToPlay in TACTICS && (TACTICS[cardToPlay].name === "Fog" || TACTICS[cardToPlay].name === "Mud");
+    const readyToDesertPinChange = !claimed && cardToPlay && cardToPlay in TACTICS && (TACTICS[cardToPlay].name === "Deserter") && (mudded || fogged);
+
     let changeTactic = null;
     if (readyToAlterPin) changeTactic = TACTICS[cardToPlay].name;
 
@@ -74,6 +76,16 @@ function Pin({ pinData, pin }) {
         }
     };
 
+    const handleDesertFogOrMud = () => {
+        if (!readyToDesertPinChange) return;
+        if (mudded && (player1CardsPlayed.length === numberOfCards || player2CardsPlayed.length === numberOfCards)) {
+            alert("You cannot Desert Mud if either player has played four cards already.");
+            return;
+        }
+        const tacticNameToRemove = mudded ? "Mud" : fogged ? "Fog" : null;
+        return updateNextAction(handleRemoveChangePinTactic("player1", pin, cardToPlay, tacticNameToRemove, gameData));
+    };
+
     return (
         <div className={`pin ${claimed ? `claimed-${claimed}` : ''}`}>
             <div className='cards-played'>
@@ -83,14 +95,20 @@ function Pin({ pinData, pin }) {
             className="circle"
             style = {{
                 translateY: claimed === "player1" ? '20px' : claimed === "player2" ? '-20px' : 'inherit',
-                backgroundColor: mudded ? CARD_COLORS["mud"] : fogged ? CARD_COLORS["fog"] : 'red'
-            }}>{pinNumber}</div>
+                backgroundColor: mudded ? CARD_COLORS["mud"] : fogged ? CARD_COLORS["fog"] : 'red',
+                cursor: readyToDesertPinChange ? 'pointer' : 'default'
+            }}
+            onClick={handleDesertFogOrMud}
+            >{pinNumber}</div>
             <div className='cards-played'>
                 {renderCards(player1CardsPlayed, 'player1')}
             </div>
             {readyToAlterPin && (
                 <button className='claim-button'
-                style={{ cursor: claimed ? 'default' : 'pointer' }}
+                style={{ 
+                    cursor: claimed ? 'default' : 'pointer',
+                    backgroundColor: TACTICS[cardToPlay].name === "Fog" ? CARD_COLORS["fog"] : "Mud" ? CARD_COLORS["mud"] : CARD_COLORS["claim"]
+                }}
                 onClick={playTactic}>
                     {TACTICS[cardToPlay].name === "Fog" ? "Fog" : "Mud"}
                 </button>
