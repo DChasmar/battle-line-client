@@ -1,7 +1,7 @@
 {
   "files": {
-    "main.css": "/battle-line-client/static/css/main.e42ac555.css",
-    "main.js": "/battle-line-client/static/js/main.17618c7f.js",
+    "main.css": "/battle-line-client/static/css/main.59053637.css",
+    "main.js": "/battle-line-client/static/js/main.969954cc.js",
     "static/js/592.599f76a2.chunk.js": "/battle-line-client/static/js/592.599f76a2.chunk.js",
     "static/media/darius.svg": "/battle-line-client/static/media/darius.7abe578786c267e48ff1ddacbee812a4.svg",
     "static/media/traitor.svg": "/battle-line-client/static/media/traitor.f09061b4ef1710746aa8c088afec329a.svg",
@@ -14,12 +14,12 @@
     "static/media/redeploy.svg": "/battle-line-client/static/media/redeploy.291bed2a0ebb7a2ae5f92a282afad7c6.svg",
     "index.html": "/battle-line-client/index.html",
     "static/media/mud.svg": "/battle-line-client/static/media/mud.321bbfab4a4a685d14e83f326b7ea8b9.svg",
-    "main.e42ac555.css.map": "/battle-line-client/static/css/main.e42ac555.css.map",
-    "main.17618c7f.js.map": "/battle-line-client/static/js/main.17618c7f.js.map",
+    "main.59053637.css.map": "/battle-line-client/static/css/main.59053637.css.map",
+    "main.969954cc.js.map": "/battle-line-client/static/js/main.969954cc.js.map",
     "592.599f76a2.chunk.js.map": "/battle-line-client/static/js/592.599f76a2.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.e42ac555.css",
-    "static/js/main.17618c7f.js"
+    "static/css/main.59053637.css",
+    "static/js/main.969954cc.js"
   ]
 }
