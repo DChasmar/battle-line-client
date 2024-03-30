@@ -1,0 +1,25 @@
+{
+  "files": {
+    "main.css": "/battle-line-client/static/css/main.e42ac555.css",
+    "main.js": "/battle-line-client/static/js/main.17618c7f.js",
+    "static/js/592.599f76a2.chunk.js": "/battle-line-client/static/js/592.599f76a2.chunk.js",
+    "static/media/darius.svg": "/battle-line-client/static/media/darius.7abe578786c267e48ff1ddacbee812a4.svg",
+    "static/media/traitor.svg": "/battle-line-client/static/media/traitor.f09061b4ef1710746aa8c088afec329a.svg",
+    "static/media/alexander.svg": "/battle-line-client/static/media/alexander.b7cc3f7613b728e0e4d258cb6bfae360.svg",
+    "static/media/shield-bearer.svg": "/battle-line-client/static/media/shield-bearer.d721b8ac5d12a1a7069b2f6848044bb1.svg",
+    "static/media/fog.svg": "/battle-line-client/static/media/fog.d98075a7f65f16951137af9171ff73a3.svg",
+    "static/media/campaign-cavalry.svg": "/battle-line-client/static/media/campaign-cavalry.dacd38ce2c95bb17a86b7c7dccc520a4.svg",
+    "static/media/deserter.svg": "/battle-line-client/static/media/deserter.239e351bb40381a28505768978c1d6c5.svg",
+    "static/media/scout.svg": "/battle-line-client/static/media/scout.3563596d68c8ba53d5d0c467b0e897f7.svg",
+    "static/media/redeploy.svg": "/battle-line-client/static/media/redeploy.291bed2a0ebb7a2ae5f92a282afad7c6.svg",
+    "index.html": "/battle-line-client/index.html",
+    "static/media/mud.svg": "/battle-line-client/static/media/mud.321bbfab4a4a685d14e83f326b7ea8b9.svg",
+    "main.e42ac555.css.map": "/battle-line-client/static/css/main.e42ac555.css.map",
+    "main.17618c7f.js.map": "/battle-line-client/static/js/main.17618c7f.js.map",
+    "592.599f76a2.chunk.js.map": "/battle-line-client/static/js/592.599f76a2.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.e42ac555.css",
+    "static/js/main.17618c7f.js"
+  ]
+}
