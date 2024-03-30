@@ -136,3 +136,62 @@ export const SCOUT_MESSAGES = [
     "Select two cards from your hand to return to the top of the deck.",
     "Return one more card from your hand."
 ];
+
+export const instructionsModalContent = (
+    <div>
+        <p>
+            Battle Line is a card game created by Reiner Knizia. This is a web version of Battle Line. If you enjoy the game, I thoroughly recommend purchasing a copy of the original. It is a simple and rich, two-player card game.
+        </p>
+        <p>
+            The object of the game is to create a better three-card hand than your opponent for each Flag. If you win 5 of the 9 Flags, or 3 Flags in a row, you win the game.
+        </p>
+        <p>
+            Hands are ranked in the following order:
+        </p>
+        <ul>
+            <li><strong>Wedge (Straight-Flush):</strong> Three-in-a-row of the same color. The best hand is 10-9-8 all of one color. This beats 9-8-7 of one color, which beats 8-7-6 of one color, etc. Any Wedge is beats a…</li>
+            <li><strong>Phalanx (Three-of-a-Kind):</strong> Three 10s is better than three 9s, etc. Any Phalanx beats a…</li>
+            <li><strong>Battalion Order (Flush):</strong> Three of one color (but not three-in-a-row). Sum the three numbers. Between two Flush hands, the one with the larger sum wins. Any flush beats a…</li>
+            <li><strong>Skirmish Line (Straight):</strong> Three-in-a-row (but not of the same color). 10-9-8 beats 9-8-7, which beats 8-7-6, etc. Any straight beats…</li>
+            <li><strong>Host (Sum):</strong> If there is no Flush, Straight or Three-of-a-Kind, sum the number values on the cards. A larger sum beats a smaller sum.</li>
+        </ul>
+        <p>
+            If opposing hands have the same value, the hand which was completed first wins.
+        </p>
+        <p>
+            There are two decks in the game.
+        </p>
+        <ul>
+            <li><strong>The Troop Deck</strong> contains 60 Troop cards: 1 to 10 for each of six colors: Red, Orange, Yellow, Green, Blue, and Purple.</li>
+            <li><strong>The Tactic Deck</strong> contains 10 unique Tactic cards.</li>
+        </ul>
+        <p>
+            Each Tactic card has a special ability:
+        </p>
+        <ul>
+            <li><strong>Darius and Alexander</strong> can represent any Troop Card. If you have already played Darius or Alexander, you cannot play the other.</li>
+            <li><strong>Campaign Cavalry</strong> can be 8 of any color.</li>
+            <li><strong>Shield Bearer</strong> can be 3, 2, or 1 of any color.</li>
+            <li><strong>Fog</strong> makes a Flag based solely on largest sum.</li>
+            <li><strong>Mud</strong> makes a Flag based on the best 4-card hand.</li>
+            <li><strong>Traitor</strong> allows a player to take a Troop card the opponent has played, and place it on their own side next to an unclaimed flag.</li>
+            <li><strong>Deserter</strong> allows a player to remove a Troop or Tactic card the opponent has played on an unclaimed Flag.</li>
+            <li><strong>Redeploy</strong> allows a player to reposition a card played on an unclaimed flag to another unclaimed flag, or discard the card.</li>
+            <li><strong>Scout</strong> allows a player to choose three cards from either Deck, and return any two cards to the top of the deck.</li>
+        </ul>
+        <p>
+            A player can never play two more Tactic cards than their opponent. If you have played one more Tactic card than your opponent, you must wait for your opponent to play a Tactic card before you can play another.
+        </p>
+        <p>
+            Each player begins with 7 Troop Cards. A Player may never have more than 7 cards in their hand at one time. On a player’s turn, they can:
+        </p>
+        <ol>
+            <li>Claim one or more Flags.</li>
+            <li>Play one Troop or Tactic Card.</li>
+            <li>Draw one Troop Card or one Tactic Card.</li>
+        </ol>
+        <p>
+            In this web version, a player cannot claim a Flag at the end of their turn. In the original card game, you can play either way: Claim flags at the beginning of your turn, or at the end, but not both.
+        </p>
+    </div>
+);

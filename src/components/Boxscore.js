@@ -52,14 +52,14 @@ function Boxscore() {
                         {gameData["tacticsPlayed"].player1.size > 0 && (
                             <p>
                                 Player 1: {Array.from(gameData["tacticsPlayed"].player1).map((tactic, index) => (
-                                    <span key={index}>{`${tactic}${index < (gameData["tacticsPlayed"].size - 1) ? ', ' : ''}`} </span>
+                                    <span key={index}> {`${tactic}${index < (gameData.tacticsPlayed.player1.size - 1) ? ', ' : ''}`} </span>
                                 ))}
                             </p>
                         )}
                         {gameData["tacticsPlayed"].player2.size > 0 && (
                             <p>
                                 Player 2: {Array.from(gameData["tacticsPlayed"].player2).map((tactic, index) => (
-                                    <span key={index}>{tactic} </span>
+                                    <span key={index}> {`${tactic}${index < (gameData.tacticsPlayed.player2.size - 1) ? ', ' : ''}`} </span>
                                 ))}
                             </p>
                         )}

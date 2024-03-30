@@ -70,7 +70,8 @@ function App() {
           cardToTactic, 
           setCardToTactic,
           hidePrompt,
-          toggleInstructions
+          toggleInstructions,
+          showInstructions
         }}>
       {showPrompt && <Prompt />}
       <h2> Battle Line </h2>

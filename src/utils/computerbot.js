@@ -400,6 +400,41 @@ const tryForTrips = (data, remainingCards) => {
     else return tryForFlush(data, remainingCards);
 };
 
+const tryWithTactic = (hand, cardsPlayed) => {
+    const troop = cardsPlayed[0][0] !== 't' ? cardsPlayed[0] : cardsPlayed[1];
+    const color = troop[0];
+    const number = parseInt(troop.slice(1));
+
+    const tactic = cardsPlayed[0][0] === 't' ? cardsPlayed[0] : cardsPlayed[1];
+    const possibleColors = TACTICS[tactic].possibleColors;
+
+    if (!possibleColors.includes(color)) return false;
+
+    const possibleNumbers = new Set(TACTICS[tactic].possibleNumbers);
+    
+    const twoMore = color + (number + 2);
+    const oneMore = color + (number + 1);
+    const oneLess = color + (number - 1);
+    const twoLess = color + (number - 2);
+
+    if (possibleNumbers.has(number + 2)) {
+        if (hand.has(oneMore)) return oneMore;
+    }
+    if (possibleNumbers.has(number + 1)) {
+        if (hand.has(twoMore)) return twoMore;
+        if (hand.has(oneLess)) return oneLess;
+    }
+    if (possibleNumbers.has(number - 1)) {
+        if (hand.has(oneMore)) return oneMore;
+        if (hand.has(twoLess)) return twoLess;
+    }
+    if (possibleNumbers.has(number - 2)) {
+        if (hand.has(oneLess)) return oneLess;
+    }
+    
+    return false
+};
+
 const tryForWedge = (data, remainingCards) => {
     const hand = data["player2Hand"];
 
@@ -438,6 +473,14 @@ const tryForWedge = (data, remainingCards) => {
         } else if (length === 2) {
             const color1 = cardsPlayed[0][0];
             const color2 = cardsPlayed[1][0];
+
+            if ((color1 === 't' || color2 === 't') && !(color1 === 't' && color2 === 't')) {
+                const result = tryWithTactic(hand, cardsPlayed);
+                if (result) {
+                    const card = result;
+                    return {card, pin};
+                }
+            }
 
             if (color1 !== color2) continue;
 
@@ -757,3 +800,4 @@ export const handlePlayer2DrawCard = (data) => {
 // If there is a flag the opponent has 3 cards on, and I have two cards played, is there a card I can play to win the hand immediately?
 // Maybe if it is time to play a random card, I can play a card the opponent wants.
 // Can I track the last card the opponent played for the sake of the computer?
+// The bot needs to be able to process a one troop and one tactic hand

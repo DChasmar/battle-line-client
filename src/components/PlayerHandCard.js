@@ -48,13 +48,14 @@ function PlayerHandCard({ cardValue }) {
       let newData;
       if (newCardToTactic.stage < 5) {
         newData = handleReturnCardToTopOfDeck("player1", cardValue, gameData);
+        setGameData(newData);
         setCardToTactic(newCardToTactic);
       } else {
         newData = handleRemoveScoutFromHand("player1", cardToPlay, handleReturnCardToTopOfDeck("player1", cardValue, gameData));
+        setGameData(updateNextAction2("player2Play", newData));
         setCardToPlay("");
         setCardToTactic(null);
       };
-      setGameData(updateNextAction2("player2Play", newData));
     }
 
     if (cardValue in TACTICS) {

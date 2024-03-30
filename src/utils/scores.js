@@ -473,7 +473,7 @@ const noCardsPlayed = (numberOfCards, remainingCards, otherScore) => {
         return 0;
     }
 
-    let score;
+    let score = 0;
 
     const remainingByColorArrays = getRemainingByColorArrays(remainingCards);
 
@@ -567,7 +567,7 @@ const oneTroopPlayed = (player, pin, remainingCards, otherScore, data) => {
 
     const numberOfCards = data[pin]["tacticsPlayed"].includes("Mud") ? 4 : 3;
 
-    let score;
+    let score = 0;
 
     score = canWedge1(color, number, numberOfCards, remainingCards);
 
@@ -605,7 +605,7 @@ const oneTacticPlayed = (player, pin, remainingCards, otherScore, data) => {
     const possibleNumbersSet = new Set(possibleNumbersArray);
     const possibleColors = new Set(TACTICS[card].possibleColors);
 
-    let score;
+    let score = 0;
 
     const remainingByColorSets = getRemainingByColorSets(remainingCards);
 
@@ -814,7 +814,7 @@ const twoTacticsPlayed = (player, pin, remainingCards, otherScore, data) => {
 
     const remainingByColorSets = getRemainingByColorSets(remainingCards);
 
-    let score;
+    let score = 0;
 
     for (const color of commonColors) {
         score = Math.max(score, WEDGE_VALUE + consecutiveTwoTacticsNoTroops(remainingByColorSets[color], possibleNumbersSet1, possibleNumbersSet2, numberOfCards));

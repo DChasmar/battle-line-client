@@ -62,9 +62,9 @@ export const initializeGameData = () => {
 
     const dealCardData = dealCards(troopCards);
 
-    data["player1Hand"] = dealCardData.player1Hand;
-    data["player2Hand"] = dealCardData.player2Hand;
-    data["player2HandConcealed"] = disguiseOpponentHand(dealCardData.player2Hand);
+    data["player1Hand"] = dealCardData.player1Hand; // a set
+    data["player2Hand"] = dealCardData.player2Hand; // a set
+    data["player2HandConcealed"] = disguiseOpponentHand(dealCardData.player2Hand); // an array
     data["used"] = new Set();
     data["troopCards"] = dealCardData.newTroopCards;
     data["tacticCards"] = buildTacticDeck();
