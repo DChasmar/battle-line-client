@@ -53,7 +53,7 @@ function Pin({ pinData, pin }) {
             newGameData[pin]["claimed"] = true;
             // Remove pin from playable for tactic cards (if not a color card);
 
-            const nextEventMessage = { description: `player1 claimed Pin ${pin[3]}.` };
+            const nextEventMessage = { description: `Player 1 claimed Pin ${pin[3]}.` };
             newGameData["events"].push(nextEventMessage);
 
             const winner = checkGameOver(newGameData);
@@ -76,14 +76,21 @@ function Pin({ pinData, pin }) {
         }
     };
 
-    const handleDesertFogOrMud = () => {
+    const handleDesertFogOrMud = (str) => {
         if (!readyToDesertPinChange) return;
-        if (mudded && (player1CardsPlayed.length === numberOfCards || player2CardsPlayed.length === numberOfCards)) {
-            alert("You cannot Desert Mud if either player has played four cards already.");
-            return;
-        }
-        const tacticNameToRemove = mudded ? "Mud" : fogged ? "Fog" : null;
-        return updateNextAction(handleRemoveChangePinTactic("player1", pin, cardToPlay, tacticNameToRemove, gameData));
+        let tacticNameToRemove = null;
+        if (str === 'either') {
+            if (mudded && (player1CardsPlayed.length === numberOfCards || player2CardsPlayed.length === numberOfCards)) {
+                alert("You cannot Desert Mud if either player has played four cards already.");
+                return;
+            }
+            tacticNameToRemove = mudded ? "Mud" : fogged ? "Fog" : null;
+        } else if (str === 'both') {
+            tacticNameToRemove = fogged ? "Fog" : null;
+        } else console.log("Error in handleDesertFogOrMud in Pin");
+        const newData = updateNextAction(handleRemoveChangePinTactic("player1", pin, cardToPlay, tacticNameToRemove, gameData));
+        setGameData(newData);
+        setCardToPlay("");
     };
 
     return (
@@ -91,15 +98,26 @@ function Pin({ pinData, pin }) {
             <div className='cards-played'>
                 {renderCards(player2CardsPlayed, 'player2')}
             </div>
-            <div
-            className="circle"
-            style = {{
-                translateY: claimed === "player1" ? '20px' : claimed === "player2" ? '-20px' : 'inherit',
-                backgroundColor: mudded ? CARD_COLORS["mud"] : fogged ? CARD_COLORS["fog"] : 'red',
-                cursor: readyToDesertPinChange ? 'pointer' : 'default'
-            }}
-            onClick={handleDesertFogOrMud}
-            >{pinNumber}</div>
+            <div className="circle-container" >
+                <div
+                    className="circle"
+                    style={{
+                        backgroundColor: mudded ? CARD_COLORS["mud"] : fogged ? CARD_COLORS["fog"] : 'red',
+                        cursor: readyToDesertPinChange ? 'pointer' : 'default'
+                    }}
+                    onClick={() => handleDesertFogOrMud("either")}
+                > {pinNumber} </div>
+                { fogged && mudded && (
+                    <div
+                        className="circle"
+                        style={{
+                            backgroundColor: fogged && mudded ? CARD_COLORS["fog"] : 'red',
+                            cursor: readyToDesertPinChange ? 'pointer' : 'default'
+                        }}
+                        onClick={() => handleDesertFogOrMud("both")}
+                    > {pinNumber} </div>
+                )}
+            </div>
             <div className='cards-played'>
                 {renderCards(player1CardsPlayed, 'player1')}
             </div>

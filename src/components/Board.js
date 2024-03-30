@@ -13,7 +13,7 @@ function Board() {
     const { gameData, setGameData, cardToPlay, setCardToPlay, cardToTactic, setCardToTactic } = useContext(AppContext);
 
     if (!gameData || !Object.keys(gameData).length) {
-        console.log("No gameData for the Board.")
+        // console.log("No gameData for the Board.")
         return null; // or return a loading indicator or an empty div
     }
 

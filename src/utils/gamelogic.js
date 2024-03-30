@@ -28,7 +28,7 @@ export const playCard = (player, pin, card, data) => {
     const color = COLORS_SET.has(card[0]) ? COLOR_REFERENCE[card[0]] : card[0] === 't' ? TACTICS[card].name : "Error finding card value";
     const cardName = COLORS_SET.has(card[0]) ? `${parseInt(card.slice(1))} ${color}` : color;
 
-    const nextEventMessage = { description: `${player} played ${cardName} on Flag ${pin[3]}.` }
+    const nextEventMessage = { description: `Player ${player.slice(-1)} played ${cardName} on Flag ${pin[3]}.` }
 
     newData["events"].push(nextEventMessage);
 
@@ -40,7 +40,7 @@ const takeCardOnTopOfDeck = (player, deck, data) => {
     const drawnCard = data[deckToDrawFrom].slice(-1)[0];
     console.log(drawnCard);
 
-    const nextEventMessage = { description: `${player} selected a T${deck.slice(1)} Card.` };
+    const nextEventMessage = { description: `Player ${player.slice(-1)} selected a T${deck.slice(1)} Card.` };
 
     const newData = {
         ...data,
@@ -58,8 +58,8 @@ export const selectTroopCard = (player, scout, data) => {
     const troopCardsList = Array.from(data["troopCards"]);
     const drawnCard = troopCardsList[Math.floor(Math.random() * troopCardsList.length)];
 
-    const nextEventMessage = !scout ? { description: `${player} selected a Troop Card.` } :
-    { description: `${player} used Scout to select a Troop Card.` };
+    const nextEventMessage = !scout ? { description: `Player ${player.slice(-1)} selected a Troop Card.` } :
+    { description: `Player ${player.slice(-1)} used Scout to select a Troop Card.` };
 
     const newData = {
         ...data,
@@ -77,7 +77,7 @@ export const selectTacticCard = (player, scout, data) => {
     const tacticCardsList = Array.from(data["tacticCards"]);
     const drawnCard = tacticCardsList[Math.floor(Math.random() * tacticCardsList.length)];
 
-    const nextEventMessage = !scout ? { description: `${player} selected a Tactic Card.` } :
+    const nextEventMessage = !scout ? { description: `Player ${player.slice(-1)} selected a Tactic Card.` } :
     { description: `${player} used Scout to select a Tactic Card.` };
 
     const newData = {
@@ -158,13 +158,19 @@ export const updateNextAction = (data) => {
     const latestAction = actionCycle[currentIndex];
 
     const newIndex = (currentIndex + 1) % actionCycle.length;
-    const newNextAction = actionCycle[newIndex];
+    let newNextAction = actionCycle[newIndex];
     
     let newData = { ...data };
     if (latestAction === "player2Draw") newData["player2HandConcealed"] = disguiseOpponentHand(data.player2Hand);
 
     newData["nextAction"] = newNextAction;
-    if (newNextAction === "player1Draw" || newNextAction === "player2Draw") return newData;
+    if (newNextAction === "player1Draw" || newNextAction === "player2Draw") {
+        if (data.troopCards.size > 0 || data.tacticCards.size > 0) return newData;
+        else {
+            newNextAction = newNextAction === "player1Draw" ? "player2Play" : "player1Play";
+            newData["nextAction"] = newNextAction;
+        }
+    };
 
     const player = newNextAction.slice(0, 7);
     return findClaimableAndPlayable(player, newData);

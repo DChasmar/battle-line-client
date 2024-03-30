@@ -273,7 +273,7 @@ const mudThreeTroops = (player, pin, remainingCards, otherScore, data) => {
 
 const maxMudScore = (player, pin, remainingCards, otherScore, data) => {
     const fog = data[pin]["tacticsPlayed"].includes("Fog");
-    if (fog) return maxFogScore(player, pin, otherScore, data);
+    if (fog) return maxFogScore(player, pin, remainingCards, data);
 
     const cardsPlayed = data[pin][player]["cardsPlayed"];
     const tacticCount = countTactics(cardsPlayed);

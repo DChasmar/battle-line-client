@@ -97,6 +97,13 @@ body {
   background-color: #45a049;
 }
 
+.circle-container {
+  display: flex; /* Set to flex to make the circles appear side-by-side */
+  align-items: center;
+  justify-content: center;
+  /* Add any other necessary styles */
+}
+
 .circle {
   display: flex;
   align-items: center;

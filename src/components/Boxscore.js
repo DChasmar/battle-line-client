@@ -8,7 +8,7 @@ function Boxscore() {
     const { gameData, cardToPlay } = useContext(AppContext);
 
     if (!gameData || !Object.keys(gameData).length) {
-        console.log("No gameData for the Boxscore.")
+        // console.log("No gameData for the Boxscore.")
         return null; // or return a loading indicator or an empty div
     }
 
@@ -36,8 +36,8 @@ function Boxscore() {
                         <div>
                         {gameData["discardedCards"].length > 0 && (
                             <div>
-                            <h4 style={{textDecoration: 'underline'}} >Discarded Cards</h4>
-                            <div>
+                            <h4 style={{ textDecoration: 'underline' }} >Discarded Cards</h4>
+                            <div style={{ display: 'flex', justifyContent: 'center' }} >
                                 {gameData["discardedCards"].map((card, index) => (
                                 <Card key={index} cardValue={card} />
                                 ))}
@@ -45,9 +45,9 @@ function Boxscore() {
                             </div>
                         )}
                         </div>
-                        <div>
+                        <div style={{ margin: '2px' }}>
                         {(gameData["tacticsPlayed"].player1.size > 0 || gameData["tacticsPlayed"].player2.size > 0) && (
-                            <h4 style={{textDecoration: 'underline'}} >Tactics Played:</h4>
+                            <h4 style={{ textDecoration: 'underline' }} >Tactics Played:</h4>
                         )}
                         {gameData["tacticsPlayed"].player1.size > 0 && (
                             <p>

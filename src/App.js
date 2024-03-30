@@ -46,12 +46,12 @@ function App() {
   const toggleInstructions = () => {
     if (showInstructions) setShowInstructions(false);
     else setShowInstructions(true);
-  };
+  }; 
 
 
-  useEffect(() => {
-    console.log(gameData);
-  }, [gameData]);
+  // useEffect(() => {
+  //   console.log(gameData);
+  // }, [gameData]);
 
   // useEffect(() => {
   //   console.log(cardToPlay);

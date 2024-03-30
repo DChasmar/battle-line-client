@@ -33,7 +33,7 @@ export const handleDiscard = (player, tacticUsed, cardDiscardedData, data) => {
     const color = COLORS_SET.has(card[0]) ? COLOR_REFERENCE[card[0]] : card[0] === 't' ? TACTICS[card].name : "Error finding card value";
     const cardName = COLORS_SET.has(card[0]) ? `${parseInt(card.slice(1))} ${color}` : color;
 
-    const nextEventMessage = { description: `${player} used Tactic ${TACTICS[tacticUsed].name} to discard ${cardName} from Flag ${pin[3]}.` }
+    const nextEventMessage = { description: `Player ${player.slice(-1)} used Tactic ${TACTICS[tacticUsed].name} to discard ${cardName} from Flag ${pin[3]}.` }
 
     newData["events"].push(nextEventMessage);
 
@@ -60,14 +60,14 @@ export const handleRemoveChangePinTactic = (player, pin, tacticUsed, tacticNameT
     };
 
     // Remove the card from the cardsPlayed array using filter
-    newData[pin]["tacticsPlayed"] = newData[pin]["tacticsPlayed"].filter(tactic => TACTICS[tactic].name !== tacticNameToRemove);
+    newData[pin]["tacticsPlayed"] = newData[pin]["tacticsPlayed"].filter(tactic => tactic !== tacticNameToRemove);
     const tacticCard = findKeyByTacticName(TACTICS, tacticNameToRemove);
     newData["discardedCards"].push(tacticCard);
     newData["tacticsPlayed"][player].add(TACTICS[tacticUsed].name);
     newData["used"].add(tacticUsed); // Should I not add tactics to used?
     newData[`${player}Hand`].delete(tacticUsed);
 
-    const nextEventMessage = { description: `${player} used Tactic ${TACTICS[tacticUsed].name} to discard ${tacticNameToRemove} from Flag ${pin[3]}.` }
+    const nextEventMessage = { description: `Player ${player.slice(-1)} used Tactic ${TACTICS[tacticUsed].name} to discard ${tacticNameToRemove} from Flag ${pin[3]}.` }
 
     newData["events"].push(nextEventMessage);
 
@@ -136,7 +136,7 @@ export const handleTraitor = (player, tacticUsed, cardTraitorData, destinationPi
     const color = COLORS_SET.has(card[0]) ? COLOR_REFERENCE[card[0]] : card[0] === 't' ? TACTICS[card].name : "Error finding card value";
     const cardName = COLORS_SET.has(card[0]) ? `${parseInt(card.slice(1))} ${color}` : color;
 
-    const nextEventMessage = { description: `${player} used Tactic ${TACTICS[tacticUsed].name} to steal ${cardName} from Flag ${pin[3]} and add it to Flag ${destinationPin[3]}.` }
+    const nextEventMessage = { description: `Player ${player.slice(-1)} used Tactic ${TACTICS[tacticUsed].name} to steal ${cardName} from Flag ${pin[3]} and add it to Flag ${destinationPin[3]}.` }
 
     newData["events"].push(nextEventMessage);
 
@@ -152,7 +152,7 @@ export const handleReturnCardToTopOfDeck = (player, card, data) => {
     else newData["troopDeckTop"].push(card);
     newData[`${player}Hand`].delete(card);
 
-    const nextEventMessage = { description: `${player} returned a ${tactic ? "Tactic" : "Troop"} Card to the top of the deck.` };
+    const nextEventMessage = { description: `Player ${player.slice(-1)} returned a ${tactic ? "Tactic" : "Troop"} Card to the top of the deck.` };
 
     newData["events"] = [...data["events"], nextEventMessage];
 
@@ -175,7 +175,7 @@ export const handleMud = (player, pin, card, data) => {
     data['used'].add(card);
     newData["tacticsPlayed"][player].add("Mud");
 
-    const nextEventMessage = { description: `${player} played Mud on Flag ${pin[3]}.` };
+    const nextEventMessage = { description: `Player ${player.slice(-1)} played Mud on Flag ${pin[3]}.` };
 
     newData["events"] = [...data["events"], nextEventMessage];
 
@@ -190,7 +190,7 @@ export const handleFog = (player, pin, card, data) => {
     data['used'].add(card);
     newData["tacticsPlayed"][player].add("Fog");
 
-    const nextEventMessage = { description: `${player} played Fog on Flag ${pin[3]}.` };
+    const nextEventMessage = { description: `Player ${player.slice(-1)} played Fog on Flag ${pin[3]}.` };
 
     newData["events"] = [...data["events"], nextEventMessage];
 

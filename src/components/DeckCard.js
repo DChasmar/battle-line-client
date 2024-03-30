@@ -42,7 +42,7 @@ function DeckCard( {troop, tactic} ) {
         setGameData(newData);
       } else if (tactic) {
         if (player1HandTroopCount < 1) {
-          console.log(`troopCount is ${player1HandTroopCount}`)
+          // console.log(`troopCount is ${player1HandTroopCount}`)
           alert("You must have at least one troop card in your hand.");
           return;
         }
