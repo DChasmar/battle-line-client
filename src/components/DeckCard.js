@@ -15,10 +15,10 @@ function DeckCard( {troop, tactic} ) {
 
     // Dynamically assign styles
     const styles = {
-      backgroundColor: troop ? CARD_COLORS["T"] : tactic ? CARD_COLORS["t"] : 'white',
+      backgroundColor: troop ? CARD_COLORS.T : tactic ? CARD_COLORS.t : 'white',
       fontSize: '10px',
       justifyContent: 'center',
-      cursor: (gameData["nextAction"] === 'player1Draw' || scout) ? 'pointer' : 'default'
+      cursor: (gameData.nextAction === 'player1Draw' || scout) ? 'pointer' : 'default'
     }
 
     const text = troop ? "Troop" : tactic ? "Tactic" : null
@@ -27,14 +27,12 @@ function DeckCard( {troop, tactic} ) {
     const player1HandTroopCount = player1HandArray.filter(item => item[0] !== 't').length;
 
     const handleClick = () => {
-      if (gameData["nextAction"] !== 'player1Draw') return;
-      if (troop && gameData["troopCards"].size < 1) {
+      if (gameData.nextAction !== 'player1Draw') return;
+      if (troop && gameData.troopCards.size < 1 && gameData.troopDeckTop.length < 1) {
         alert("There are no Troop cards left.");
-        // Manage condition when there are no troops or no tactics left
         return;
-      } else if (tactic && gameData["tacticCards"].size < 1) {
+      } else if (tactic && gameData.tacticCards.size < 1 && gameData.tacticDeckTop.length < 1) {
         alert("There are no Tactic cards left.");
-        // Manage condition when there are no troops or no tactics left
         return;
       }
       if (troop) {

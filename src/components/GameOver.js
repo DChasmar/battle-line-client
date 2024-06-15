@@ -12,7 +12,7 @@ function GameOver() {
     return (
         <div className='game-over-modal'>
             <div className='game-over-content'>
-                <h3>{gameData["gameOver"]} wins!</h3>
+                <h3>{`Player ${gameData["gameOver"].slice(-1)} wins!`}</h3>
                 <button onClick={play}>Play Again</button>
             </div>
         </div>

@@ -60,7 +60,7 @@ function App() {
   // }, [cardToPlay, cardToTactic]);
 
   return (
-    <div className="App">
+    <main className="App">
       <AppContext.Provider
         value={{
           gameData,
@@ -81,7 +81,7 @@ function App() {
       </div>
       {showInstructions && <Instructions />}
       </AppContext.Provider>
-    </div>
+    </main>
   );
 }
 

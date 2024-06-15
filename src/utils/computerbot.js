@@ -771,9 +771,9 @@ export const handlePlayer2DrawCard = (data) => {
     }
     const cardsUsed = data.used.size;
     const tacticPlayable = data.tacticsPlayed.player2.size <= data.tacticsPlayed.player1.size;
-    if (data.tacticCards.size > 0 && tacticsInHand < 2 && ((tacticsInOpponentHand > tacticsInHand && tacticPlayable) || (cardsUsed > 30 && data.tacticsPlayed.player2.size === 0))) return updateNextAction(selectTacticCard('player2', false, data));
-    else if (data.troopCards.size > 0) return updateNextAction(selectTroopCard('player2', false, data));
-    else if (data.tacticCards.size > 0) return updateNextAction(selectTacticCard('player2', false, data));
+    if ((data.tacticCards.size > 0 || data.tacticDeckTop.length > 0)  && tacticsInHand < 2 && ((tacticsInOpponentHand > tacticsInHand && tacticPlayable) || (cardsUsed > 30 && data.tacticsPlayed.player2.size === 0))) return updateNextAction(selectTacticCard('player2', false, data));
+    else if (data.troopCards.size > 0 || data.troopDeckTop.length > 0) return updateNextAction(selectTroopCard('player2', false, data));
+    else if (data.tacticCards.size > 0 || data.tacticDeckTop.length > 0) return updateNextAction(selectTacticCard('player2', false, data));
 };
 
 // Select a Tactic card:

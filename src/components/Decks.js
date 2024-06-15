@@ -12,8 +12,8 @@ function Decks() {
 
     return (
         <div style = {{display: 'flex', flexDirection: 'row', margin: '10px'}}>
-            {gameData["troopCards"].size > 0 && <DeckCard troop />}
-            {gameData["tacticCards"].size > 0 && <DeckCard tactic />}
+            {(gameData.troopCards.size > 0 || gameData.troopDeckTop.length > 0) && <DeckCard troop />}
+            {(gameData.tacticCards.size > 0 || gameData.tacticDeckTop.length > 0) && <DeckCard tactic />}
         </div>
     )
 }

@@ -1,3 +1,5 @@
+# Battle Line
+
 Battle Line is a card game created by Reiner Knizia. This is a web version of Battle Line. If you enjoy the game, I thoroughly recommend purchasing a copy of the original. It is a simple and rich, two-player card game.
 
 The object of the game is to create a better three-card hand than your opponent for each Flag. If you win 5 of the 9 Flags, or 3 Flags in a row, you win the game.
@@ -33,6 +35,7 @@ Scout allows a player to choose three cards from either Deck, and return any two
 A player can never player two more Tactic cards than their opponent. If you have played one more Tactic card than your opponent, you must wait for your opponent to play a Tactic card before you can play another.
 
 Each player begins with 7 Troop Cards. A Player may never have more than 7 cards in their hand at one time. On a player’s turn, they can:
+
 1. Claim one or more Flags.
 2. Play one Troop or Tactic Card.
 3. Draw one Troop Card or one Tactic Card.
